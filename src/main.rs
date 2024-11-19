@@ -271,7 +271,7 @@ struct Task {
     #[serde(default = "Uuid::new_v4")]
     id: Uuid,
     description: String,
-    completed: bool,
+    is_checked: bool,
 
     #[serde(skip)]
     state: TaskState,
@@ -291,7 +291,7 @@ impl Default for TaskState {
 
 #[derive(Debug, Clone)]
 pub enum TaskMessage {
-    Completed(bool),
+    CheckboxToggled(bool),
     Edit,
     DescriptionEdited(String),
     FinishEdition,
@@ -307,15 +307,15 @@ impl Task {
         Task {
             id: Uuid::new_v4(),
             description,
-            completed: false,
+            is_checked: false,
             state: TaskState::Idle,
         }
     }
 
     fn update(&mut self, message: TaskMessage) {
         match message {
-            TaskMessage::Completed(completed) => {
-                self.completed = completed;
+            TaskMessage::CheckboxToggled(is_checked) => {
+                self.is_checked = is_checked;
             }
             TaskMessage::Edit => {
                 self.state = TaskState::Editing;
@@ -335,8 +335,8 @@ impl Task {
     fn view(&self, i: usize) -> Element<TaskMessage> {
         match &self.state {
             TaskState::Idle => {
-                let checkbox = checkbox(&self.description, self.completed)
-                    .on_toggle(TaskMessage::Completed)
+                let checkbox = checkbox(&self.description, self.is_checked)
+                    .on_toggle(TaskMessage::CheckboxToggled)
                     .width(Fill)
                     .size(17)
                     .text_shaping(text::Shaping::Advanced);
@@ -380,7 +380,7 @@ impl Task {
 }
 
 fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
-    let tasks_left = tasks.iter().filter(|task| !task.completed).count();
+    let tasks_left = tasks.iter().filter(|task| !task.is_checked).count();
 
     let filter_button = |label, filter, current_filter| {
         let label = text(label);
@@ -426,8 +426,8 @@ impl Filter {
     fn matches(self, task: &Task) -> bool {
         match self {
             Filter::All => true,
-            Filter::Active => !task.completed,
-            Filter::Completed => task.completed,
+            Filter::Active => !task.is_checked,
+            Filter::Completed => task.is_checked,
         }
     }
 }
