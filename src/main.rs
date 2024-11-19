@@ -226,8 +226,8 @@ impl Todos {
                 } else {
                     empty_message(match filter {
                         Filter::All => "You have not created a task yet...",
-                        Filter::Active => "All your tasks are done! :D",
-                        Filter::Completed => {
+                        Filter::Unchecked => "All your tasks are done! :D",
+                        Filter::Checked => {
                             "You have not completed a task yet..."
                         }
                     })
@@ -402,8 +402,8 @@ fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
         .width(Fill),
         row![
             filter_button("All", Filter::All, current_filter),
-            filter_button("Active", Filter::Active, current_filter),
-            filter_button("Completed", Filter::Completed, current_filter,),
+            filter_button("Unchecked", Filter::Unchecked, current_filter),
+            filter_button("Checked", Filter::Checked, current_filter,),
         ]
         .spacing(10)
     ]
@@ -418,16 +418,16 @@ fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
 pub enum Filter {
     #[default]
     All,
-    Active,
-    Completed,
+    Unchecked,
+    Checked,
 }
 
 impl Filter {
     fn matches(self, task: &Task) -> bool {
         match self {
             Filter::All => true,
-            Filter::Active => !task.is_checked,
-            Filter::Completed => task.is_checked,
+            Filter::Unchecked => !task.is_checked,
+            Filter::Checked => task.is_checked,
         }
     }
 }
