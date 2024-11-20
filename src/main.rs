@@ -380,7 +380,7 @@ impl Task {
 }
 
 fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
-    let tasks_left = tasks.iter().filter(|task| !task.is_checked).count();
+    let items_checked = tasks.iter().filter(|task| task.is_checked).count();
 
     let filter_button = |label, filter, current_filter| {
         let label = text(label);
@@ -396,8 +396,8 @@ fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
 
     row![
         text!(
-            "{tasks_left} {} left",
-            if tasks_left == 1 { "task" } else { "tasks" }
+            "{items_checked} {} selected",
+            if items_checked == 1 { "item" } else { "items" }
         )
         .width(Fill),
         row![
