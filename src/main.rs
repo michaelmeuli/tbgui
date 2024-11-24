@@ -4,7 +4,7 @@ use iced::widget::{
     text_input,
 };
 use iced::window;
-use iced::{Center, Element, Fill, Subscription, Task as Command};
+use iced::{Center, Element, Fill, Subscription, Task};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -30,7 +30,7 @@ enum Tbgui {
 struct State {
     input_value: String,
     filter: Filter,
-    tasks: Vec<Task>,
+    items: Vec<Item>,
     dirty: bool,
     saving: bool,
 }
@@ -40,18 +40,18 @@ enum Message {
     Loaded(Result<SavedState, LoadError>),
     Saved(Result<(), SaveError>),
     InputChanged(String),
-    CreateTask,
+    CreateItem,
     FilterChanged(Filter),
-    TaskMessage(usize, TaskMessage),
+    ItemMessage(usize, ItemMessage),
     TabPressed { shift: bool },
     ToggleFullscreen(window::Mode),
 }
 
 impl Tbgui {
-    fn new() -> (Self, Command<Message>) {
+    fn new() -> (Self, Task<Message>) {
         (
             Self::Loading,
-            Command::perform(SavedState::load(), Message::Loaded),
+            Task::perform(SavedState::load(), Message::Loaded),
         )
     }
 
@@ -64,7 +64,7 @@ impl Tbgui {
         format!("TbGUI{} - IMM", if dirty { "*" } else { "" })
     }
 
-    fn update(&mut self, message: Message) -> Command<Message> {
+    fn update(&mut self, message: Message) -> Task<Message> {
         match self {
             Tbgui::Loading => {
                 match message {
@@ -72,7 +72,7 @@ impl Tbgui {
                         *self = Tbgui::Loaded(State {
                             input_value: state.input_value,
                             filter: state.filter,
-                            tasks: state.tasks,
+                            items: state.items,
                             ..State::default()
                         });
                     }
@@ -82,7 +82,7 @@ impl Tbgui {
                     _ => {}
                 }
 
-                text_input::focus("new-task")
+                text_input::focus("new-item")
             }
             Tbgui::Loaded(state) => {
                 let mut saved = false;
@@ -91,34 +91,34 @@ impl Tbgui {
                     Message::InputChanged(value) => {
                         state.input_value = value;
 
-                        Command::none()
+                        Task::none()
                     }
-                    Message::CreateTask => {
+                    Message::CreateItem => {
                         if !state.input_value.is_empty() {
-                            state.tasks.push(Task::new(state.input_value.clone()));
+                            state.items.push(Item::new(state.input_value.clone()));
                             state.input_value.clear();
                         }
 
-                        Command::none()
+                        Task::none()
                     }
                     Message::FilterChanged(filter) => {
                         state.filter = filter;
 
-                        Command::none()
+                        Task::none()
                     }
-                    Message::TaskMessage(i, task_message) => {
-                        if let Some(task) = state.tasks.get_mut(i) {
-                            task.update(task_message);
-                            Command::none()
+                    Message::ItemMessage(i, item_message) => {
+                        if let Some(item) = state.items.get_mut(i) {
+                            item.update(item_message);
+                            Task::none()
                         } else {
-                            Command::none()
+                            Task::none()
                         }
                     }
                     Message::Saved(_result) => {
                         state.saving = false;
                         saved = true;
 
-                        Command::none()
+                        Task::none()
                     }
                     Message::TabPressed { shift } => {
                         if shift {
@@ -129,7 +129,7 @@ impl Tbgui {
                     }
                     Message::ToggleFullscreen(mode) => window::get_latest()
                         .and_then(move |window| window::change_mode(window, mode)),
-                    Message::Loaded(_) => Command::none(),
+                    Message::Loaded(_) => Task::none(),
                 };
 
                 if !saved {
@@ -140,20 +140,20 @@ impl Tbgui {
                     state.dirty = false;
                     state.saving = true;
 
-                    Command::perform(
+                    Task::perform(
                         SavedState {
                             input_value: state.input_value.clone(),
                             filter: state.filter,
-                            tasks: state.tasks.clone(),
+                            items: state.items.clone(),
                         }
                         .save(),
                         Message::Saved,
                     )
                 } else {
-                    Command::none()
+                    Task::none()
                 };
 
-                Command::batch(vec![command, save])
+                Task::batch(vec![command, save])
             }
         }
     }
@@ -164,7 +164,7 @@ impl Tbgui {
             Tbgui::Loaded(State {
                 input_value,
                 filter,
-                tasks,
+                items,
                 ..
             }) => {
                 let title = text("tbgui")
@@ -174,27 +174,27 @@ impl Tbgui {
                     .align_x(Center);
 
                 let input = text_input("What needs to be done?", input_value)
-                    .id("new-task")
+                    .id("new-item")
                     .on_input(Message::InputChanged)
-                    .on_submit(Message::CreateTask)
+                    .on_submit(Message::CreateItem)
                     .padding(15)
                     .size(30)
                     .align_x(Center);
 
-                let controls = view_controls(tasks, *filter);
-                let filtered_tasks = tasks.iter().filter(|task| filter.matches(task));
+                let controls = view_controls(items, *filter);
+                let filtered_items = items.iter().filter(|item| filter.matches(item));
 
-                let tasks: Element<_> = if filtered_tasks.count() > 0 {
+                let items: Element<_> = if filtered_items.count() > 0 {
                     keyed_column(
-                        tasks
+                        items
                             .iter()
                             .enumerate()
-                            .filter(|(_, task)| filter.matches(task))
-                            .map(|(i, task)| {
+                            .filter(|(_, item)| filter.matches(item))
+                            .map(|(i, item)| {
                                 (
-                                    task.id,
-                                    task.view()
-                                        .map(move |message| Message::TaskMessage(i, message)),
+                                    item.id,
+                                    item.view()
+                                        .map(move |message| Message::ItemMessage(i, message)),
                                 )
                             }),
                     )
@@ -202,13 +202,13 @@ impl Tbgui {
                     .into()
                 } else {
                     empty_message(match filter {
-                        Filter::All => "You have not created a task yet...",
-                        Filter::Unchecked => "All your tasks are done! :D",
-                        Filter::Checked => "You have not completed a task yet...",
+                        Filter::All => "You have not created a item yet...",
+                        Filter::Unchecked => "All your items are done! :D",
+                        Filter::Checked => "You have not completed a item yet...",
                     })
                 };
 
-                let content = column![title, input, controls, tasks]
+                let content = column![title, input, controls, items]
                     .spacing(20)
                     .max_width(800);
 
@@ -242,7 +242,7 @@ impl Tbgui {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct Task {
+struct Item {
     #[serde(default = "Uuid::new_v4")]
     id: Uuid,
     description: String,
@@ -250,30 +250,30 @@ struct Task {
 }
 
 #[derive(Debug, Clone)]
-pub enum TaskMessage {
+pub enum ItemMessage {
     CheckboxToggled(bool),
 }
 
-impl Task {
+impl Item {
     fn new(description: String) -> Self {
-        Task {
+        Item {
             id: Uuid::new_v4(),
             description,
             is_checked: false,
         }
     }
 
-    fn update(&mut self, message: TaskMessage) {
+    fn update(&mut self, message: ItemMessage) {
         match message {
-            TaskMessage::CheckboxToggled(is_checked) => {
+            ItemMessage::CheckboxToggled(is_checked) => {
                 self.is_checked = is_checked;
             }
         }
     }
 
-    fn view(&self) -> Element<TaskMessage> {
+    fn view(&self) -> Element<ItemMessage> {
         let checkbox = checkbox(&self.description, self.is_checked)
-            .on_toggle(TaskMessage::CheckboxToggled)
+            .on_toggle(ItemMessage::CheckboxToggled)
             .width(Fill)
             .size(17)
             .text_shaping(text::Shaping::Advanced);
@@ -282,8 +282,8 @@ impl Task {
     }
 }
 
-fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
-    let items_checked = tasks.iter().filter(|task| task.is_checked).count();
+fn view_controls(items: &[Item], current_filter: Filter) -> Element<Message> {
+    let items_checked = items.iter().filter(|item| item.is_checked).count();
 
     let filter_button = |label, filter, current_filter| {
         let label = text(label);
@@ -324,11 +324,11 @@ pub enum Filter {
 }
 
 impl Filter {
-    fn matches(self, task: &Task) -> bool {
+    fn matches(self, item: &Item) -> bool {
         match self {
             Filter::All => true,
-            Filter::Unchecked => !task.is_checked,
-            Filter::Checked => task.is_checked,
+            Filter::Unchecked => !item.is_checked,
+            Filter::Checked => item.is_checked,
         }
     }
 }
@@ -354,7 +354,7 @@ fn empty_message(message: &str) -> Element<'_, Message> {
 struct SavedState {
     input_value: String,
     filter: Filter,
-    tasks: Vec<Task>,
+    items: Vec<Item>,
 }
 
 #[derive(Debug, Clone)]
