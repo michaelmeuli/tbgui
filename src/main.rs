@@ -13,15 +13,15 @@ pub fn main() -> iced::Result {
     #[cfg(not(target_arch = "wasm32"))]
     tracing_subscriber::fmt::init();
 
-    iced::application(Items::title, Items::update, Items::view)
-        .subscription(Items::subscription)
+    iced::application(Tbgui::title, Tbgui::update, Tbgui::view)
+        .subscription(Tbgui::subscription)
         .font(include_bytes!("../fonts/icons.ttf").as_slice())
         .window_size((500.0, 800.0))
-        .run_with(Items::new)
+        .run_with(Tbgui::new)
 }
 
 #[derive(Debug)]
-enum Items {
+enum Tbgui {
     Loading,
     Loaded(State),
 }
@@ -47,7 +47,7 @@ enum Message {
     ToggleFullscreen(window::Mode),
 }
 
-impl Items {
+impl Tbgui {
     fn new() -> (Self, Command<Message>) {
         (
             Self::Loading,
@@ -57,8 +57,8 @@ impl Items {
 
     fn title(&self) -> String {
         let dirty = match self {
-            Items::Loading => false,
-            Items::Loaded(state) => state.dirty,
+            Tbgui::Loading => false,
+            Tbgui::Loaded(state) => state.dirty,
         };
 
         format!("TbGUI{} - IMM", if dirty { "*" } else { "" })
@@ -66,10 +66,10 @@ impl Items {
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match self {
-            Items::Loading => {
+            Tbgui::Loading => {
                 match message {
                     Message::Loaded(Ok(state)) => {
-                        *self = Items::Loaded(State {
+                        *self = Tbgui::Loaded(State {
                             input_value: state.input_value,
                             filter: state.filter,
                             tasks: state.tasks,
@@ -77,14 +77,14 @@ impl Items {
                         });
                     }
                     Message::Loaded(Err(_)) => {
-                        *self = Items::Loaded(State::default());
+                        *self = Tbgui::Loaded(State::default());
                     }
                     _ => {}
                 }
 
                 text_input::focus("new-task")
             }
-            Items::Loaded(state) => {
+            Tbgui::Loaded(state) => {
                 let mut saved = false;
 
                 let command = match message {
@@ -160,8 +160,8 @@ impl Items {
 
     fn view(&self) -> Element<Message> {
         match self {
-            Items::Loading => loading_message(),
-            Items::Loaded(State {
+            Tbgui::Loading => loading_message(),
+            Tbgui::Loaded(State {
                 input_value,
                 filter,
                 tasks,
