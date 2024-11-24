@@ -1,10 +1,10 @@
 use iced::keyboard;
 use iced::widget::{
-    self, button, center, checkbox, column, container, keyed_column, row,
-    scrollable, text, text_input, Text,
+    self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
+    text_input,
 };
 use iced::window;
-use iced::{Center, Element, Fill, Font, Subscription, Task as Command};
+use iced::{Center, Element, Fill, Subscription, Task as Command};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -95,9 +95,7 @@ impl Todos {
                     }
                     Message::CreateTask => {
                         if !state.input_value.is_empty() {
-                            state
-                                .tasks
-                                .push(Task::new(state.input_value.clone()));
+                            state.tasks.push(Task::new(state.input_value.clone()));
                             state.input_value.clear();
                         }
 
@@ -108,27 +106,10 @@ impl Todos {
 
                         Command::none()
                     }
-                    Message::TaskMessage(i, TaskMessage::Delete) => {
-                        state.tasks.remove(i);
-
-                        Command::none()
-                    }
                     Message::TaskMessage(i, task_message) => {
                         if let Some(task) = state.tasks.get_mut(i) {
-                            let should_focus =
-                                matches!(task_message, TaskMessage::Edit);
-
                             task.update(task_message);
-
-                            if should_focus {
-                                let id = Task::text_input_id(i);
-                                Command::batch(vec![
-                                    text_input::focus(id.clone()),
-                                    text_input::select_all(id),
-                                ])
-                            } else {
-                                Command::none()
-                            }
+                            Command::none()
                         } else {
                             Command::none()
                         }
@@ -147,9 +128,7 @@ impl Todos {
                         }
                     }
                     Message::ToggleFullscreen(mode) => window::get_latest()
-                        .and_then(move |window| {
-                            window::change_mode(window, mode)
-                        }),
+                        .and_then(move |window| window::change_mode(window, mode)),
                     Message::Loaded(_) => Command::none(),
                 };
 
@@ -203,8 +182,7 @@ impl Todos {
                     .align_x(Center);
 
                 let controls = view_controls(tasks, *filter);
-                let filtered_tasks =
-                    tasks.iter().filter(|task| filter.matches(task));
+                let filtered_tasks = tasks.iter().filter(|task| filter.matches(task));
 
                 let tasks: Element<_> = if filtered_tasks.count() > 0 {
                     keyed_column(
@@ -215,9 +193,8 @@ impl Todos {
                             .map(|(i, task)| {
                                 (
                                     task.id,
-                                    task.view(i).map(move |message| {
-                                        Message::TaskMessage(i, message)
-                                    }),
+                                    task.view()
+                                        .map(move |message| Message::TaskMessage(i, message)),
                                 )
                             }),
                     )
@@ -227,9 +204,7 @@ impl Todos {
                     empty_message(match filter {
                         Filter::All => "You have not created a task yet...",
                         Filter::Unchecked => "All your tasks are done! :D",
-                        Filter::Checked => {
-                            "You have not completed a task yet..."
-                        }
+                        Filter::Checked => "You have not completed a task yet...",
                     })
                 };
 
@@ -272,43 +247,19 @@ struct Task {
     id: Uuid,
     description: String,
     is_checked: bool,
-
-    #[serde(skip)]
-    state: TaskState,
-}
-
-#[derive(Debug, Clone)]
-pub enum TaskState {
-    Idle,
-    Editing,
-}
-
-impl Default for TaskState {
-    fn default() -> Self {
-        Self::Idle
-    }
 }
 
 #[derive(Debug, Clone)]
 pub enum TaskMessage {
     CheckboxToggled(bool),
-    Edit,
-    DescriptionEdited(String),
-    FinishEdition,
-    Delete,
 }
 
 impl Task {
-    fn text_input_id(i: usize) -> text_input::Id {
-        text_input::Id::new(format!("task-{i}"))
-    }
-
     fn new(description: String) -> Self {
         Task {
             id: Uuid::new_v4(),
             description,
             is_checked: false,
-            state: TaskState::Idle,
         }
     }
 
@@ -317,65 +268,17 @@ impl Task {
             TaskMessage::CheckboxToggled(is_checked) => {
                 self.is_checked = is_checked;
             }
-            TaskMessage::Edit => {
-                self.state = TaskState::Editing;
-            }
-            TaskMessage::DescriptionEdited(new_description) => {
-                self.description = new_description;
-            }
-            TaskMessage::FinishEdition => {
-                if !self.description.is_empty() {
-                    self.state = TaskState::Idle;
-                }
-            }
-            TaskMessage::Delete => {}
         }
     }
 
-    fn view(&self, i: usize) -> Element<TaskMessage> {
-        match &self.state {
-            TaskState::Idle => {
-                let checkbox = checkbox(&self.description, self.is_checked)
-                    .on_toggle(TaskMessage::CheckboxToggled)
-                    .width(Fill)
-                    .size(17)
-                    .text_shaping(text::Shaping::Advanced);
+    fn view(&self) -> Element<TaskMessage> {
+        let checkbox = checkbox(&self.description, self.is_checked)
+            .on_toggle(TaskMessage::CheckboxToggled)
+            .width(Fill)
+            .size(17)
+            .text_shaping(text::Shaping::Advanced);
 
-                row![
-                    checkbox,
-                    button(edit_icon())
-                        .on_press(TaskMessage::Edit)
-                        .padding(10)
-                        .style(button::text),
-                ]
-                .spacing(20)
-                .align_y(Center)
-                .into()
-            }
-            TaskState::Editing => {
-                let text_input =
-                    text_input("Describe your task...", &self.description)
-                        .id(Self::text_input_id(i))
-                        .on_input(TaskMessage::DescriptionEdited)
-                        .on_submit(TaskMessage::FinishEdition)
-                        .padding(10);
-
-                row![
-                    text_input,
-                    button(
-                        row![delete_icon(), "Delete"]
-                            .spacing(10)
-                            .align_y(Center)
-                    )
-                    .on_press(TaskMessage::Delete)
-                    .padding(10)
-                    .style(button::danger)
-                ]
-                .spacing(20)
-                .align_y(Center)
-                .into()
-            }
-        }
+        row![checkbox,].spacing(20).align_y(Center).into()
     }
 }
 
@@ -412,9 +315,7 @@ fn view_controls(tasks: &[Task], current_filter: Filter) -> Element<Message> {
     .into()
 }
 
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum Filter {
     #[default]
     All,
@@ -446,24 +347,6 @@ fn empty_message(message: &str) -> Element<'_, Message> {
     )
     .height(200)
     .into()
-}
-
-// Fonts
-const ICONS: Font = Font::with_name("Iced-Todos-Icons");
-
-fn icon(unicode: char) -> Text<'static> {
-    text(unicode.to_string())
-        .font(ICONS)
-        .width(20)
-        .align_x(Center)
-}
-
-fn edit_icon() -> Text<'static> {
-    icon('\u{F303}')
-}
-
-fn delete_icon() -> Text<'static> {
-    icon('\u{F1F8}')
 }
 
 // Persistence
@@ -522,8 +405,7 @@ impl SavedState {
     async fn save(self) -> Result<(), SaveError> {
         use async_std::prelude::*;
 
-        let json = serde_json::to_string_pretty(&self)
-            .map_err(|_| SaveError::Format)?;
+        let json = serde_json::to_string_pretty(&self).map_err(|_| SaveError::Format)?;
 
         let path = Self::path();
 
@@ -572,8 +454,7 @@ impl SavedState {
     async fn save(self) -> Result<(), SaveError> {
         let storage = Self::storage().ok_or(SaveError::File)?;
 
-        let json = serde_json::to_string_pretty(&self)
-            .map_err(|_| SaveError::Format)?;
+        let json = serde_json::to_string_pretty(&self).map_err(|_| SaveError::Format)?;
 
         storage
             .set_item("state", &json)
