@@ -374,14 +374,14 @@ enum SaveError {
 impl SavedState {
     fn path() -> std::path::PathBuf {
         let mut path = if let Some(project_dirs) =
-            directories_next::ProjectDirs::from("rs", "Iced", "Todos")
+            directories_next::ProjectDirs::from("rs", "IMM", "tbgui")
         {
             project_dirs.data_dir().into()
         } else {
             std::env::current_dir().unwrap_or_default()
         };
 
-        path.push("todos.json");
+        path.push("tbgui.json");
 
         path
     }
