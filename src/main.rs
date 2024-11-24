@@ -13,15 +13,15 @@ pub fn main() -> iced::Result {
     #[cfg(not(target_arch = "wasm32"))]
     tracing_subscriber::fmt::init();
 
-    iced::application(Todos::title, Todos::update, Todos::view)
-        .subscription(Todos::subscription)
+    iced::application(Items::title, Items::update, Items::view)
+        .subscription(Items::subscription)
         .font(include_bytes!("../fonts/icons.ttf").as_slice())
         .window_size((500.0, 800.0))
-        .run_with(Todos::new)
+        .run_with(Items::new)
 }
 
 #[derive(Debug)]
-enum Todos {
+enum Items {
     Loading,
     Loaded(State),
 }
@@ -47,7 +47,7 @@ enum Message {
     ToggleFullscreen(window::Mode),
 }
 
-impl Todos {
+impl Items {
     fn new() -> (Self, Command<Message>) {
         (
             Self::Loading,
@@ -57,19 +57,19 @@ impl Todos {
 
     fn title(&self) -> String {
         let dirty = match self {
-            Todos::Loading => false,
-            Todos::Loaded(state) => state.dirty,
+            Items::Loading => false,
+            Items::Loaded(state) => state.dirty,
         };
 
-        format!("Todos{} - Iced", if dirty { "*" } else { "" })
+        format!("TbGUI{} - IMM", if dirty { "*" } else { "" })
     }
 
     fn update(&mut self, message: Message) -> Command<Message> {
         match self {
-            Todos::Loading => {
+            Items::Loading => {
                 match message {
                     Message::Loaded(Ok(state)) => {
-                        *self = Todos::Loaded(State {
+                        *self = Items::Loaded(State {
                             input_value: state.input_value,
                             filter: state.filter,
                             tasks: state.tasks,
@@ -77,14 +77,14 @@ impl Todos {
                         });
                     }
                     Message::Loaded(Err(_)) => {
-                        *self = Todos::Loaded(State::default());
+                        *self = Items::Loaded(State::default());
                     }
                     _ => {}
                 }
 
                 text_input::focus("new-task")
             }
-            Todos::Loaded(state) => {
+            Items::Loaded(state) => {
                 let mut saved = false;
 
                 let command = match message {
@@ -160,14 +160,14 @@ impl Todos {
 
     fn view(&self) -> Element<Message> {
         match self {
-            Todos::Loading => loading_message(),
-            Todos::Loaded(State {
+            Items::Loading => loading_message(),
+            Items::Loaded(State {
                 input_value,
                 filter,
                 tasks,
                 ..
             }) => {
-                let title = text("todos")
+                let title = text("tbgui")
                     .width(Fill)
                     .size(100)
                     .color([0.5, 0.5, 0.5])
