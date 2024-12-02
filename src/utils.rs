@@ -2,10 +2,53 @@ use directories_next::UserDirs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::collections::HashMap;
-use crate::Item;
+use crate::{Item, USERNAME, REMOTE_RAW_DIR};
+use uuid::Uuid;
+use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 
 
-fn create_tasks(file_names: Vec<String>) -> Vec<Item> {
+pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
+    let key_path = match ssh_key_path() {
+        Ok(path) => path,
+        Err(e) => {
+            eprintln!("Failed to get SSH key path: {}", e);
+            return Err(async_ssh2_tokio::Error::IoError(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "SSH key path not found",
+            )));
+        }
+    };
+
+    let auth_method = AuthMethod::with_key_file(key_path, None);
+    let client = Client::connect(
+        ("130.60.24.133", 22),
+        USERNAME,
+        auth_method,
+        ServerCheckMethod::NoCheck,
+    )
+    .await?;
+
+    Ok(client)
+}
+
+pub async fn get_file_names(client: &Client) -> Result<Vec<String>, async_ssh2_tokio::Error> {
+    let command = format!("test -d {} && echo 'exists'", REMOTE_RAW_DIR);
+    let result = client.execute(&command).await?;
+    if result.stdout.trim() != "exists" {
+        log_error(&format!("Directory on remote with raw reads does not exist: {}", REMOTE_RAW_DIR));
+        panic!("Directory on remote with raw reads does not exist: {}", REMOTE_RAW_DIR);
+    }
+
+    let command = format!("ls {}", REMOTE_RAW_DIR);
+    let result = client.execute(&command).await?;
+    assert_eq!(result.exit_status, 0);
+    let stdout = result.stdout;
+
+    let file_names: Vec<String> = stdout.lines().map(String::from).collect();
+    Ok(file_names)
+}
+
+pub fn create_tasks(file_names: Vec<String>) -> Vec<Item> {
     let mut tasks = Vec::new();
     let mut grouped_files: HashMap<String, (String, String)> = HashMap::new();
     for file_name in file_names {
@@ -29,6 +72,7 @@ fn create_tasks(file_names: Vec<String>) -> Vec<Item> {
     }
     for (sample, (read1, read2)) in grouped_files {
         tasks.push(Item {
+            id: Uuid::new_v4(),
             sample,
             read1,
             read2,

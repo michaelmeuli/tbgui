@@ -1,5 +1,5 @@
-//mod utils;
-//use utils::*;
+mod utils;
+use utils::*;
 
 use iced::keyboard;
 use iced::widget::{
@@ -11,6 +11,9 @@ use iced::{Center, Element, Fill, Subscription, Task};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
+const USERNAME: &str = "mimeul";
 
 pub fn main() -> iced::Result {
     #[cfg(not(target_arch = "wasm32"))]
@@ -40,7 +43,7 @@ struct State {
 
 #[derive(Debug, Clone)]
 enum Message {
-    Loaded(Result<SavedState, LoadError>),
+    Loaded(Result<Vec<Item>, LoadError>),
     Saved(Result<(), ()>),
     FilterChanged(Filter),
     ItemMessage(usize, ItemMessage),
@@ -71,9 +74,7 @@ impl Tbgui {
                 match message {
                     Message::Loaded(Ok(state)) => {
                         *self = Tbgui::Loaded(State {
-                            input_value: state.input_value,
-                            filter: state.filter,
-                            items: state.items,
+                            items: state,
                             ..State::default()
                         });
                     }
@@ -149,11 +150,7 @@ impl Tbgui {
     fn view(&self) -> Element<Message> {
         match self {
             Tbgui::Loading => loading_message(),
-            Tbgui::Loaded(State {
-                filter,
-                items,
-                ..
-            }) => {
+            Tbgui::Loaded(State { filter, items, .. }) => {
                 let title = text("tbgui")
                     .width(Fill)
                     .size(100)
@@ -335,41 +332,21 @@ struct SavedState {
 
 #[derive(Debug, Clone)]
 enum LoadError {
-    File,
-    Format,
+    SSH,
 }
 
-
-#[cfg(not(target_arch = "wasm32"))]
 impl SavedState {
-    fn path() -> std::path::PathBuf {
-        let mut path = if let Some(project_dirs) =
-            directories_next::ProjectDirs::from("rs", "IMM", "tbgui")
-        {
-            project_dirs.data_dir().into()
-        } else {
-            std::env::current_dir().unwrap_or_default()
-        };
-
-        path.push("tbgui.json");
-
-        path
-    }
-
-    async fn load() -> Result<SavedState, LoadError> {
-        use async_std::prelude::*;
-
-        let mut contents = String::new();
-
-        let mut file = async_std::fs::File::open(Self::path())
+    async fn load() -> Result<Vec<Item>, LoadError> {
+        let client = create_client()
             .await
-            .map_err(|_| LoadError::File)?;
-
-        file.read_to_string(&mut contents)
+            .map_err(|_| LoadError::SSH)?;
+        println!("Connected to the server");
+        let file_names = get_file_names(&client)
             .await
-            .map_err(|_| LoadError::File)?;
+            .map_err(|_| LoadError::SSH)?;
 
-        serde_json::from_str(&contents).map_err(|_| LoadError::Format)
+        let tasks = create_tasks(file_names);
+        Ok(tasks)
     }
 
     async fn save(self) -> Result<(), ()> {
