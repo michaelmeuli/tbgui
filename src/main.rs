@@ -8,15 +8,12 @@ use iced::widget::{
 };
 use iced::window;
 use iced::{Center, Element, Fill, Subscription, Task};
-
-use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
 const USERNAME: &str = "mimeul";
 
 pub fn main() -> iced::Result {
-    #[cfg(not(target_arch = "wasm32"))]
     tracing_subscriber::fmt::init();
 
     iced::application(Tbgui::title, Tbgui::update, Tbgui::view)
@@ -34,7 +31,6 @@ enum Tbgui {
 
 #[derive(Debug, Default)]
 struct State {
-    input_value: String,
     filter: Filter,
     items: Vec<Item>,
     dirty: bool,
@@ -130,11 +126,7 @@ impl Tbgui {
                     state.saving = true;
 
                     Task::perform(
-                        SavedState {
-                            input_value: state.input_value.clone(),
-                            filter: state.filter,
-                            items: state.items.clone(),
-                        }
+                        SavedState {}
                         .save(),
                         Message::Saved,
                     )
@@ -220,9 +212,8 @@ impl Tbgui {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 struct Item {
-    #[serde(default = "Uuid::new_v4")]
     id: Uuid,
     sample: String,
     read1: String,
@@ -288,7 +279,7 @@ fn view_controls(items: &[Item], current_filter: Filter) -> Element<Message> {
     .into()
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Filter {
     #[default]
     All,
@@ -323,12 +314,8 @@ fn empty_message(message: &str) -> Element<'_, Message> {
 }
 
 // Persistence
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct SavedState {
-    input_value: String,
-    filter: Filter,
-    items: Vec<Item>,
-}
+#[derive(Debug, Clone)]
+struct SavedState {}
 
 #[derive(Debug, Clone)]
 enum LoadError {
