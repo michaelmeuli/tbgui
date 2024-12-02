@@ -1,3 +1,6 @@
+//mod utils;
+//use utils::*;
+
 use iced::keyboard;
 use iced::widget::{
     self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
@@ -245,7 +248,9 @@ impl Tbgui {
 struct Item {
     #[serde(default = "Uuid::new_v4")]
     id: Uuid,
-    description: String,
+    sample: String,
+    read1: String,
+    read2: String,
     is_checked: bool,
 }
 
@@ -255,10 +260,12 @@ pub enum ItemMessage {
 }
 
 impl Item {
-    fn new(description: String) -> Self {
+    fn new(sample: String) -> Self {
         Item {
             id: Uuid::new_v4(),
-            description,
+            sample,
+            read1: String::new(),
+            read2: String::new(),
             is_checked: false,
         }
     }
@@ -272,7 +279,7 @@ impl Item {
     }
 
     fn view(&self) -> Element<ItemMessage> {
-        let checkbox = checkbox(&self.description, self.is_checked)
+        let checkbox = checkbox(&self.sample, self.is_checked)
             .on_toggle(ItemMessage::CheckboxToggled)
             .width(Fill)
             .size(17)
