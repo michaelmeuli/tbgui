@@ -150,7 +150,6 @@ impl Tbgui {
         match self {
             Tbgui::Loading => loading_message(),
             Tbgui::Loaded(State {
-                input_value,
                 filter,
                 items,
                 ..
@@ -161,11 +160,8 @@ impl Tbgui {
                     .color([0.5, 0.5, 0.5])
                     .align_x(Center);
 
-                let input = text_input("What needs to be done?", input_value)
-                    .id("new-item")
-                    .padding(15)
-                    .size(30)
-                    .align_x(Center);
+                //let button = button("Run Profiler").on_press(Message::ButtonPressed).into();
+                let button: Element<Message> = button("Run Profiler").into();
 
                 let controls = view_controls(items, *filter);
                 let filtered_items = items.iter().filter(|item| filter.matches(item));
@@ -194,7 +190,7 @@ impl Tbgui {
                     })
                 };
 
-                let content = column![title, input, controls, items]
+                let content = column![title, button, controls, items]
                     .spacing(20)
                     .max_width(800);
 
