@@ -42,8 +42,6 @@ struct State {
 enum Message {
     Loaded(Result<SavedState, LoadError>),
     Saved(Result<(), SaveError>),
-    InputChanged(String),
-    CreateItem,
     FilterChanged(Filter),
     ItemMessage(usize, ItemMessage),
     TabPressed { shift: bool },
@@ -91,19 +89,6 @@ impl Tbgui {
                 let mut saved = false;
 
                 let command = match message {
-                    Message::InputChanged(value) => {
-                        state.input_value = value;
-
-                        Task::none()
-                    }
-                    Message::CreateItem => {
-                        if !state.input_value.is_empty() {
-                            state.items.push(Item::new(state.input_value.clone()));
-                            state.input_value.clear();
-                        }
-
-                        Task::none()
-                    }
                     Message::FilterChanged(filter) => {
                         state.filter = filter;
 
@@ -178,8 +163,6 @@ impl Tbgui {
 
                 let input = text_input("What needs to be done?", input_value)
                     .id("new-item")
-                    .on_input(Message::InputChanged)
-                    .on_submit(Message::CreateItem)
                     .padding(15)
                     .size(30)
                     .align_x(Center);
@@ -260,16 +243,6 @@ pub enum ItemMessage {
 }
 
 impl Item {
-    fn new(sample: String) -> Self {
-        Item {
-            id: Uuid::new_v4(),
-            sample,
-            read1: String::new(),
-            read2: String::new(),
-            is_checked: false,
-        }
-    }
-
     fn update(&mut self, message: ItemMessage) {
         match message {
             ItemMessage::CheckboxToggled(is_checked) => {
