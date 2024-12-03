@@ -36,13 +36,11 @@ struct State {
     filter: Filter,
     items: Vec<Item>,
     dirty: bool,
-    saving: bool,
 }
 
 #[derive(Debug, Clone)]
 enum Message {
     Loaded(Result<Vec<Item>, LoadError>),
-    Saved(Result<(), ()>),
     FilterChanged(Filter),
     ItemMessage(usize, ItemMessage),
     TabPressed { shift: bool },
@@ -53,7 +51,7 @@ impl Tbgui {
     fn new() -> (Self, Task<Message>) {
         (
             Self::Loading,
-            Task::perform(SavedState::load(), Message::Loaded),
+            Task::perform(RemoteState::load(), Message::Loaded),
         )
     }
 
@@ -85,8 +83,6 @@ impl Tbgui {
                 text_input::focus("new-item")
             }
             Tbgui::Loaded(state) => {
-                let mut saved = false;
-
                 let command = match message {
                     Message::FilterChanged(filter) => {
                         state.filter = filter;
@@ -101,12 +97,6 @@ impl Tbgui {
                             Task::none()
                         }
                     }
-                    Message::Saved(_result) => {
-                        state.saving = false;
-                        saved = true;
-
-                        Task::none()
-                    }
                     Message::TabPressed { shift } => {
                         if shift {
                             widget::focus_previous()
@@ -119,24 +109,7 @@ impl Tbgui {
                     Message::Loaded(_) => Task::none(),
                 };
 
-                if !saved {
-                    state.dirty = true;
-                }
-
-                let save = if state.dirty && !state.saving {
-                    state.dirty = false;
-                    state.saving = true;
-
-                    Task::perform(
-                        SavedState {}
-                        .save(),
-                        Message::Saved,
-                    )
-                } else {
-                    Task::none()
-                };
-
-                Task::batch(vec![command, save])
+                Task::batch(vec![command])
             }
         }
     }
@@ -313,16 +286,16 @@ fn empty_message(message: &str) -> Element<'_, Message> {
     .into()
 }
 
-// Persistence
+
 #[derive(Debug, Clone)]
-struct SavedState {}
+struct RemoteState {}
 
 #[derive(Debug, Clone)]
 enum LoadError {
     SSH,
 }
 
-impl SavedState {
+impl RemoteState {
     async fn load() -> Result<Vec<Item>, LoadError> {
         let client = create_client()
             .await
@@ -334,9 +307,5 @@ impl SavedState {
 
         let tasks = create_tasks(reads);
         Ok(tasks)
-    }
-
-    async fn save(self) -> Result<(), ()> {
-        Ok(())
     }
 }
