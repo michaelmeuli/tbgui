@@ -14,7 +14,6 @@ const USERNAME: &str = "mimeul";
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
 const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
 
-
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();
 
@@ -49,10 +48,7 @@ enum Message {
 
 impl Tbgui {
     fn new() -> (Self, Task<Message>) {
-        (
-            Self::Loading,
-            Task::perform(RemoteState::load(), Message::Loaded),
-        )
+        (Self::Loading, Task::perform(load(), Message::Loaded))
     }
 
     fn title(&self) -> String {
@@ -286,26 +282,16 @@ fn empty_message(message: &str) -> Element<'_, Message> {
     .into()
 }
 
-
-#[derive(Debug, Clone)]
-struct RemoteState {}
-
 #[derive(Debug, Clone)]
 enum LoadError {
     SSH,
 }
 
-impl RemoteState {
-    async fn load() -> Result<Vec<Item>, LoadError> {
-        let client = create_client()
-            .await
-            .map_err(|_| LoadError::SSH)?;
-        println!("Connected to the server");
-        let reads = get_raw_reads(&client)
-            .await
-            .map_err(|_| LoadError::SSH)?;
+async fn load() -> Result<Vec<Item>, LoadError> {
+    let client = create_client().await.map_err(|_| LoadError::SSH)?;
+    println!("Connected to the server");
+    let reads = get_raw_reads(&client).await.map_err(|_| LoadError::SSH)?;
 
-        let tasks = create_tasks(reads);
-        Ok(tasks)
-    }
+    let tasks = create_tasks(reads);
+    Ok(tasks)
 }
