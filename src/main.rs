@@ -111,7 +111,7 @@ impl Tbgui {
                             .filter(|item| item.is_checked)
                             .map(|item| item.sample.clone())
                             .collect::<Vec<String>>()
-                            .join(", ");
+                            .join(",");
                         println!("Running TB-Profiler for samples: {}", samples);
                         let client = state.client.clone();
                         Task::perform(async move {
