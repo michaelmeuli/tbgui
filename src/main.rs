@@ -10,8 +10,10 @@ use iced::window;
 use iced::{Center, Element, Fill, Subscription, Task};
 use uuid::Uuid;
 
-const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
 const USERNAME: &str = "mimeul";
+const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
+const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
+
 
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();
@@ -143,9 +145,9 @@ impl Tbgui {
         match self {
             Tbgui::Loading => loading_message(),
             Tbgui::Loaded(State { filter, items, .. }) => {
-                let title = text("tbgui")
+                let title = text("TB-Profiler")
                     .width(Fill)
-                    .size(100)
+                    .size(60)
                     .color([0.5, 0.5, 0.5])
                     .align_x(Center);
 
@@ -216,8 +218,6 @@ impl Tbgui {
 struct Item {
     id: Uuid,
     sample: String,
-    read1: String,
-    read2: String,
     is_checked: bool,
 }
 
@@ -328,11 +328,11 @@ impl SavedState {
             .await
             .map_err(|_| LoadError::SSH)?;
         println!("Connected to the server");
-        let file_names = get_file_names(&client)
+        let reads = get_raw_reads(&client)
             .await
             .map_err(|_| LoadError::SSH)?;
 
-        let tasks = create_tasks(file_names);
+        let tasks = create_tasks(reads);
         Ok(tasks)
     }
 

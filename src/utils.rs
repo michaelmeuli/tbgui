@@ -1,11 +1,10 @@
+use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME};
+use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
+use std::collections::HashSet;
 use std::fs::OpenOptions;
 use std::io::Write;
-use std::collections::HashMap;
-use crate::{Item, USERNAME, REMOTE_RAW_DIR};
 use uuid::Uuid;
-use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
-
 
 pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = match ssh_key_path() {
@@ -31,12 +30,18 @@ pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
     Ok(client)
 }
 
-pub async fn get_file_names(client: &Client) -> Result<Vec<String>, async_ssh2_tokio::Error> {
+pub async fn get_raw_reads(client: &Client) -> Result<Vec<String>, async_ssh2_tokio::Error> {
     let command = format!("test -d {} && echo 'exists'", REMOTE_RAW_DIR);
     let result = client.execute(&command).await?;
     if result.stdout.trim() != "exists" {
-        log_error(&format!("Directory on remote with raw reads does not exist: {}", REMOTE_RAW_DIR));
-        panic!("Directory on remote with raw reads does not exist: {}", REMOTE_RAW_DIR);
+        log_error(&format!(
+            "Directory on remote with raw reads does not exist: {}",
+            REMOTE_RAW_DIR
+        ));
+        panic!(
+            "Directory on remote with raw reads does not exist: {}",
+            REMOTE_RAW_DIR
+        );
     }
 
     let command = format!("ls {}", REMOTE_RAW_DIR);
@@ -44,44 +49,27 @@ pub async fn get_file_names(client: &Client) -> Result<Vec<String>, async_ssh2_t
     assert_eq!(result.exit_status, 0);
     let stdout = result.stdout;
 
-    let file_names: Vec<String> = stdout.lines().map(String::from).collect();
-    Ok(file_names)
+    let raw_reads: Vec<String> = stdout.lines().map(String::from).collect();
+    Ok(raw_reads)
 }
 
-pub fn create_tasks(file_names: Vec<String>) -> Vec<Item> {
+pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     let mut tasks = Vec::new();
-    let mut grouped_files: HashMap<String, (String, String)> = HashMap::new();
-    for file_name in file_names {
-        if let Some((sample, suffix)) = file_name.split_once('_') {
-            match suffix {
-                "1.fastq.gz" => {
-                    grouped_files
-                        .entry(sample.to_string())
-                        .or_insert_with(|| (String::new(), String::new()))
-                        .0 = file_name.to_string();
-                }
-                "2.fastq.gz" => {
-                    grouped_files
-                        .entry(sample.to_string())
-                        .or_insert_with(|| (String::new(), String::new()))
-                        .1 = file_name.to_string();
-                }
-                _ => {}
+    let mut seen_samples = HashSet::new();
+
+    for file_name in reads {
+        if let Some((sample, _suffix)) = file_name.split_once('_') {
+            if seen_samples.insert(sample.to_string()) {
+                tasks.push(Item {
+                    id: Uuid::new_v4(),
+                    sample: sample.to_string(),
+                    is_checked: false,
+                });
             }
         }
     }
-    for (sample, (read1, read2)) in grouped_files {
-        tasks.push(Item {
-            id: Uuid::new_v4(),
-            sample,
-            read1,
-            read2,
-            is_checked: false,
-        });
-    }
     tasks
 }
-
 
 pub fn ssh_key_path() -> Result<String, String> {
     if let Some(user_dirs) = UserDirs::new() {
