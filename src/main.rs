@@ -35,7 +35,6 @@ enum Tbgui {
 struct State {
     filter: Filter,
     items: Vec<Item>,
-    dirty: bool,
     client: Option<Client>,
 }
 
@@ -54,12 +53,7 @@ impl Tbgui {
     }
 
     fn title(&self) -> String {
-        let dirty = match self {
-            Tbgui::Loading => false,
-            Tbgui::Loaded(state) => state.dirty,
-        };
-
-        format!("TbGUI{} - IMM", if dirty { "*" } else { "" })
+        "TbGUI - IMM".to_string()
     }
 
     fn update(&mut self, message: Message) -> Task<Message> {
