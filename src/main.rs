@@ -105,7 +105,7 @@ impl Tbgui {
                     Message::Loaded(_) => Task::none(),
                 };
 
-                Task::batch(vec![command])
+                command
             }
         }
     }
