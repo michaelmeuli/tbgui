@@ -13,7 +13,7 @@ use uuid::Uuid;
 
 const USERNAME: &str = "mimeul";
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
-//const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
+const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
 
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();
@@ -45,6 +45,8 @@ enum Message {
     ItemMessage(usize, ItemMessage),
     TabPressed { shift: bool },
     ToggleFullscreen(window::Mode),
+    RunTbProfiler,
+    ProfilerRunCompleted,
 }
 
 impl Tbgui {
@@ -100,6 +102,29 @@ impl Tbgui {
                     Message::ToggleFullscreen(mode) => window::get_latest()
                         .and_then(move |window| window::change_mode(window, mode)),
                     Message::Loaded(_) => Task::none(),
+                    Message::RunTbProfiler => {
+                        let items_checked =
+                            state.items.iter().filter(|item| item.is_checked).count();
+                        let samples = state
+                            .items
+                            .iter()
+                            .filter(|item| item.is_checked)
+                            .map(|item| item.sample.clone())
+                            .collect::<Vec<String>>()
+                            .join(", ");
+                        println!("Running TB-Profiler for samples: {}", samples);
+                        let client = state.client.clone();
+                        Task::perform(async move {
+                            if let Some(client) = client {
+                                if let Err(e) = run_tbprofiler(&client, items_checked, samples).await {
+                                    eprintln!("Error running tbprofiler: {:?}", e);
+                                }
+                            }
+                        }, |_| Message::ProfilerRunCompleted)
+                    }
+                    Message::ProfilerRunCompleted => {
+                        Task::none()
+                    }
                 };
 
                 command
@@ -117,8 +142,8 @@ impl Tbgui {
                     .color([0.5, 0.5, 0.5])
                     .align_x(Center);
 
-                //let button = button("Run Profiler").on_press(Message::ButtonPressed).into();
-                let button: Element<Message> = button("Run Profiler").into();
+                let button = button("Run Profiler").on_press(Message::RunTbProfiler);
+                //let button: Element<Message> = button("Run Profiler").into();
 
                 let controls = view_controls(items, *filter);
                 let filtered_items = items.iter().filter(|item| filter.matches(item));

@@ -1,0 +1,10 @@
+      final returnvalue = await _client.run(
+          'sbatch --array 0-${selectedRawreadsLength - 1} $tbProfilerScript $sampleIdsString; echo \$?');
+
+let items_checked = items.iter().filter(|item| item.is_checked).count();
+
+
+              let command = format!("sbatch --array 0-${items_checked-1} {sample}", TB_PROFILER_SCRIPT);
+    let result = client.execute(&command).await?;
+
+    remove HashMap for read1 and read2 fields

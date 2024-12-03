@@ -1,5 +1,4 @@
-//use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME};
-use crate::{Item, REMOTE_RAW_DIR, USERNAME};
+use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use std::collections::HashSet;
@@ -52,6 +51,13 @@ pub async fn get_raw_reads(client: &Client) -> Result<Vec<String>, async_ssh2_to
 
     let raw_reads: Vec<String> = stdout.lines().map(String::from).collect();
     Ok(raw_reads)
+}
+
+pub async fn run_tbprofiler(client: &Client, items_checked: usize, samples: String) -> Result<(), async_ssh2_tokio::Error> {
+    let command = format!("sbatch --array 0-{} {} \"{}\"", items_checked-1, TB_PROFILER_SCRIPT, samples);
+    println!("Running command: {}", command);
+    client.execute(&command).await?;
+    Ok(())
 }
 
 pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
