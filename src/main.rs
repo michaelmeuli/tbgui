@@ -1,6 +1,7 @@
 mod utils;
 use utils::*;
 
+use async_ssh2_tokio::client::Client;
 use iced::keyboard;
 use iced::widget::{
     self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
@@ -12,7 +13,7 @@ use uuid::Uuid;
 
 const USERNAME: &str = "mimeul";
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
-const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
+//const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
 
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();
@@ -35,11 +36,12 @@ struct State {
     filter: Filter,
     items: Vec<Item>,
     dirty: bool,
+    client: Option<Client>,
 }
 
 #[derive(Debug, Clone)]
 enum Message {
-    Loaded(Result<Vec<Item>, LoadError>),
+    Loaded(Result<RemoteState, LoadError>),
     FilterChanged(Filter),
     ItemMessage(usize, ItemMessage),
     TabPressed { shift: bool },
@@ -66,7 +68,8 @@ impl Tbgui {
                 match message {
                     Message::Loaded(Ok(state)) => {
                         *self = Tbgui::Loaded(State {
-                            items: state,
+                            items: state.items,
+                            client: Some(state.client),
                             ..State::default()
                         });
                     }
@@ -287,11 +290,20 @@ enum LoadError {
     SSH,
 }
 
-async fn load() -> Result<Vec<Item>, LoadError> {
+#[derive(Debug, Clone)]
+struct RemoteState {
+    client: Client,
+    items: Vec<Item>,
+}
+
+async fn load() -> Result<RemoteState, LoadError> {
     let client = create_client().await.map_err(|_| LoadError::SSH)?;
     println!("Connected to the server");
     let reads = get_raw_reads(&client).await.map_err(|_| LoadError::SSH)?;
 
     let tasks = create_tasks(reads);
-    Ok(tasks)
+    Ok(RemoteState {
+        client,
+        items: tasks,
+    })
 }
