@@ -2,7 +2,7 @@ mod utils;
 use utils::*;
 
 use async_ssh2_tokio::client::Client;
-use iced::keyboard;
+use iced::{keyboard, time};
 use iced::widget::{
     self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
     text_input,
@@ -10,6 +10,8 @@ use iced::widget::{
 use iced::window;
 use iced::{Center, Element, Fill, Subscription, Task};
 use uuid::Uuid;
+use std::time::Duration;
+
 
 const USERNAME: &str = "mimeul";
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
@@ -47,6 +49,7 @@ enum Message {
     ToggleFullscreen(window::Mode),
     RunTbProfiler,
     ProfilerRunCompleted,
+    DownloadResults,
 }
 
 impl Tbgui {
@@ -125,6 +128,16 @@ impl Tbgui {
                     Message::ProfilerRunCompleted => {
                         Task::none()
                     }
+                    Message::DownloadResults => {
+                        let client = state.client.clone();
+                        Task::perform(async move {
+                            if let Some(client) = client {
+                                if let Err(e) = download_results(&client).await {
+                                    eprintln!("Error downloading results: {:?}", e);
+                                }
+                            }
+                        }, |_| Message::ProfilerRunCompleted)
+                    }
                 };
 
                 command
@@ -184,7 +197,7 @@ impl Tbgui {
     fn subscription(&self) -> Subscription<Message> {
         use keyboard::key;
 
-        keyboard::on_key_press(|key, modifiers| {
+        let keyboard_subscription = keyboard::on_key_press(|key, modifiers| {
             let keyboard::Key::Named(key) = key else {
                 return None;
             };
@@ -201,7 +214,10 @@ impl Tbgui {
                 }
                 _ => None,
             }
-        })
+        });
+        let periodic_subscription = time::every(Duration::from_secs(9 * 60)).map(|_| Message::DownloadResults);
+
+        Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
 }
 
