@@ -3381,6 +3381,7 @@ dependencies = [
  "async-std",
  "directories-next",
  "iced",
+ "russh-sftp",
  "serde",
  "serde_json",
  "tokio",

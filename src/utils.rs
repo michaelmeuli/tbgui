@@ -1,10 +1,15 @@
 use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
+use russh_sftp::client::fs::ReadDir;
+use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
 use std::fs::OpenOptions;
 use std::io::Write;
+use tokio::fs::File;
 use uuid::Uuid;
+use tokio::io::AsyncReadExt;
+use tokio::io::AsyncWriteExt;
 
 pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = match ssh_key_path() {
@@ -111,4 +116,46 @@ pub fn log_error(message: &str) {
         .open("error.log")
         .expect("Failed to open log file");
     writeln!(file, "{}", message).expect("Failed to write to log file");
+}
+
+pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
+    let channel = client.get_channel().await?;
+    channel.request_subsystem(true, "sftp").await?;
+    let sftp = SftpSession::new(channel.into_stream()).await?;
+
+    let remote_dir = "/shares/sander.imm.uzh/MM/PRJEB57919/out/results/";
+    let local_dir = "./downloads"; // Adjust to your desired local directory
+    tokio::fs::create_dir_all(local_dir).await?;
+    let entries: ReadDir = sftp.read_dir(remote_dir).await?;
+
+    for entry in entries {
+        let file_name = entry.file_name();
+        let file_type = entry.file_type();
+        let metadata = entry.metadata();
+
+        println!("File: {}", file_name);
+        println!("File Type: {:?}", file_type);
+        println!("Metadata: {:?}", metadata);
+
+        if file_type.is_file() && file_name.ends_with(".docx") {
+            let remote_file_path = format!("{}/{}", remote_dir, file_name);
+            let local_file_path = format!("{}/{}", local_dir, file_name);
+            println!("Downloading: {}", remote_file_path);
+            let mut remote_file = sftp
+                .open_with_flags(&remote_file_path, OpenFlags::READ)
+                .await?;
+            let mut local_file = File::create(&local_file_path).await?;
+
+            let mut buffer = [0u8; 4096];
+            loop {
+                let n = remote_file.read(&mut buffer).await?;
+                if n == 0 {
+                    break; // End of file
+                }
+                local_file.write_all(&buffer[..n]).await?;
+            }
+            println!("File downloaded successfully to {}", local_file_path);
+        }
+    }
+    Ok(())
 }
