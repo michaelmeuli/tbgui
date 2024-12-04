@@ -115,22 +115,19 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     let remote_dir = REMOTE_RESULTS_DIR;
-    let local_dir = "./results";
-    tokio::fs::create_dir_all(local_dir).await?;
+    let local_dir = UserDirs::new().unwrap().home_dir().join("tb-profiler-results");
+    tokio::fs::create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
     for entry in entries {
         let file_name = entry.file_name();
         let file_type = entry.file_type();
-        let metadata = entry.metadata();
-
+        //let metadata = entry.metadata();
         println!("File: {}", file_name);
-        println!("File Type: {:?}", file_type);
-        println!("Metadata: {:?}", metadata);
 
         if file_type.is_file() && file_name.ends_with(".docx") {
             let remote_file_path = format!("{}/{}", remote_dir, file_name);
-            let local_file_path = format!("{}/{}", local_dir, file_name);
+            let local_file_path = local_dir.join(file_name).clone();
             println!("Downloading: {}", remote_file_path);
             let mut remote_file = sftp
                 .open_with_flags(&remote_file_path, OpenFlags::READ)
@@ -145,7 +142,7 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
                 }
                 local_file.write_all(&buffer[..n]).await?;
             }
-            println!("File downloaded successfully to {}", local_file_path);
+            println!("File downloaded successfully to {:?}", local_file_path);
         }
     }
     Ok(())

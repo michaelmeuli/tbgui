@@ -15,7 +15,7 @@ use std::time::Duration;
 const USERNAME: &str = "mimeul";
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
 const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
-const REMOTE_RESULTS_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/out/results/";
+const REMOTE_RESULTS_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/out/results";
 
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();
