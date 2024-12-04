@@ -1,10 +1,10 @@
-use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME};
+use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME, REMOTE_RESULTS_DIR};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use russh_sftp::client::fs::ReadDir;
 use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
-use std::fs::OpenOptions;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use tokio::fs::File;
 use uuid::Uuid;
@@ -14,8 +14,9 @@ use tokio::io::AsyncWriteExt;
 pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = match ssh_key_path() {
         Ok(path) => path,
-        Err(e) => {
-            println!("Failed to get SSH key path: {}", e);
+        Err(_e) => {
+            println!("create_client(): Failed to get SSH key path.");
+            log_error("create_client(): Failed to get SSH key path.");
             return Err(async_ssh2_tokio::Error::IoError(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 "SSH key path not found",
@@ -108,23 +109,13 @@ pub fn ssh_key_path() -> Result<String, String> {
     }
 }
 
-pub fn log_error(message: &str) {
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open("error.log")
-        .expect("Failed to open log file");
-    writeln!(file, "{}", message).expect("Failed to write to log file");
-}
-
 pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
-    let remote_dir = "/shares/sander.imm.uzh/MM/PRJEB57919/out/results/";
-    let local_dir = "./downloads"; // Adjust to your desired local directory
+    let remote_dir = REMOTE_RESULTS_DIR;
+    let local_dir = "./results";
     tokio::fs::create_dir_all(local_dir).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
@@ -158,4 +149,23 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
         }
     }
     Ok(())
+}
+
+pub fn log_error(message: &str) {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open("error.log")
+        .expect("Failed to open log file");
+    writeln!(file, "{}", message).expect("Failed to write to log file");
+}
+
+pub fn delete_log_file() {
+    let file_path = "error.log";
+    if fs::remove_file(file_path).is_ok() {
+        println!("File '{}' deleted successfully.", file_path);
+    } else {
+        println!("Failed to delete the file '{}'. It may not exist.", file_path);
+    }
 }
