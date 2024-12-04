@@ -10,7 +10,7 @@ pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = match ssh_key_path() {
         Ok(path) => path,
         Err(e) => {
-            eprintln!("Failed to get SSH key path: {}", e);
+            println!("Failed to get SSH key path: {}", e);
             return Err(async_ssh2_tokio::Error::IoError(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 "SSH key path not found",
@@ -53,8 +53,17 @@ pub async fn get_raw_reads(client: &Client) -> Result<Vec<String>, async_ssh2_to
     Ok(raw_reads)
 }
 
-pub async fn run_tbprofiler(client: &Client, items_checked: usize, samples: String) -> Result<(), async_ssh2_tokio::Error> {
-    let command = format!("sbatch --array 0-{} {} \"{}\"", items_checked-1, TB_PROFILER_SCRIPT, samples);
+pub async fn run_tbprofiler(
+    client: &Client,
+    items_checked: usize,
+    samples: String,
+) -> Result<(), async_ssh2_tokio::Error> {
+    let command = format!(
+        "sbatch --array 0-{} {} \"{}\"",
+        items_checked - 1,
+        TB_PROFILER_SCRIPT,
+        samples
+    );
     println!("Running command: {}", command);
     client.execute(&command).await?;
     Ok(())
@@ -94,11 +103,11 @@ pub fn ssh_key_path() -> Result<String, String> {
     }
 }
 
-fn log_error(message: &str) {
+pub fn log_error(message: &str) {
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
-        .truncate(true) // Clear the file's contents
+        .append(true)
         .open("error.log")
         .expect("Failed to open log file");
     writeln!(file, "{}", message).expect("Failed to write to log file");

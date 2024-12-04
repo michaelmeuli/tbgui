@@ -5,7 +5,6 @@ use async_ssh2_tokio::client::Client;
 use iced::keyboard;
 use iced::widget::{
     self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
-    text_input,
 };
 use iced::window;
 use iced::{Center, Element, Fill, Subscription, Task};
@@ -74,8 +73,7 @@ impl Tbgui {
                     }
                     _ => {}
                 }
-
-                text_input::focus("new-item")
+                Task::none()
             }
             Tbgui::Loaded(state) => {
                 let command = match message {
@@ -316,13 +314,21 @@ struct RemoteState {
 }
 
 async fn load() -> Result<RemoteState, LoadError> {
-    let client = create_client().await.map_err(|_| LoadError::SSH)?;
-    println!("Connected to the server");
-    let reads = get_raw_reads(&client).await.map_err(|_| LoadError::SSH)?;
+    match create_client().await {
+        Ok(client) => {
+            println!("Connected to the server");
+            let reads = get_raw_reads(&client).await.map_err(|_| LoadError::SSH)?;
 
-    let tasks = create_tasks(reads);
-    Ok(RemoteState {
-        client,
-        items: tasks,
-    })
+            let tasks = create_tasks(reads);
+            Ok(RemoteState {
+                client,
+                items: tasks,
+            })
+        }
+        Err(_) => {
+            println!("load(): Failed to connect to the server.");
+            log_error("load(): Failed to connect to the server.");
+            Err(LoadError::SSH)
+        }
+    }
 }
