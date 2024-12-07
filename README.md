@@ -2,9 +2,9 @@
 
 A simple GUI front-end for [TB-Profiler](https://github.com/jodyphelan/TBProfiler) using SSH written in [Rust](https://www.rust-lang.org/) 
 
-For now only works with [AuthMethod::with_key_file(key_path, None)](https://docs.rs/async-ssh2-tokio/latest/async_ssh2_tokio/client/enum.AuthMethod.html#method.with_key_file).
-<br>This private key file has to be in [directories_next::UserDirs::home_dir](https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.home_dir): e.g.: C:\Users\Alice\.ssh\id_rsa
-
+For now only works with [AuthMethod::with_key_file(key_path, None)](https://docs.rs/async-ssh2-tokio/latest/async_ssh2_tokio/client/enum.AuthMethod.html#method.with_key_file).<br>
+This private key file has to be in [directories_next::UserDirs::home_dir](https://docs.rs/directories-next/latest/directories_next/struct.UserDirs.html#method.home_dir): e.g.: C:\Users\Alice\.ssh\id_rsa<br>
+The scripts executed on the remote cluster can be found here: [tbgui-server-scripts](https://github.com/michaelmeuli/tbgui-server-scripts).<br>
 
 ### Built with:
 - [iced](https://iced.rs/): A cross-platform GUI library for Rust focused on simplicity and type-safety.
