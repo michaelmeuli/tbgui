@@ -123,7 +123,7 @@ impl Tbgui {
                                     if let Err(e) =
                                         run_tbprofiler(&client, items_checked, samples).await
                                     {
-                                        eprintln!("Error running tbprofiler: {:?}", e);
+                                        println!("Error running tbprofiler: {:?}", e);
                                     }
                                 }
                             },
@@ -137,7 +137,7 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     if let Err(e) = download_results(&client).await {
-                                        eprintln!("Error downloading results: {:?}", e);
+                                        println!("Error downloading results: {:?}", e);
                                     }
                                 }
                             },
@@ -150,7 +150,7 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     if let Err(e) = delete_results(&client).await {
-                                        eprintln!("Error deleting results: {:?}", e);
+                                        println!("Error deleting results: {:?}", e);
                                     }
                                 }
                             },
