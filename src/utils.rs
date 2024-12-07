@@ -149,20 +149,22 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
 }
 
 pub fn log_error(message: &str) {
+    let error_file = UserDirs::new().unwrap().home_dir().join("tb-profiler-results").join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
         .append(true)
-        .open("error.log")
+        .open(error_file)
         .expect("Failed to open log file");
     writeln!(file, "{}", message).expect("Failed to write to log file");
 }
 
 pub fn delete_log_file() {
-    let file_path = "error.log";
-    if fs::remove_file(file_path).is_ok() {
-        println!("File '{}' deleted successfully.", file_path);
+    let error_file = UserDirs::new().unwrap().home_dir().join("tb-profiler-results").join("error.log");
+    println!("Attempting to delete: {:?}", error_file);
+    if fs::remove_file(&error_file).is_ok() {
+        println!("File {:?} deleted successfully.", error_file);
     } else {
-        println!("Failed to delete the file '{}'. It may not exist.", file_path);
+        println!("Failed to delete the file {:?}. It may not exist.", error_file);
     }
 }
