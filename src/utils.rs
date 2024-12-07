@@ -59,11 +59,7 @@ pub async fn get_raw_reads(client: &Client) -> Result<Vec<String>, async_ssh2_to
     Ok(raw_reads)
 }
 
-pub async fn run_tbprofiler(
-    client: &Client,
-    items_checked: usize,
-    samples: String,
-) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn run_tbprofiler(client: &Client, items_checked: usize, samples: String,) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!(
         "sbatch --array 0-{} {} \"{}\"",
         items_checked - 1,
@@ -73,40 +69,6 @@ pub async fn run_tbprofiler(
     println!("Running command: {}", command);
     client.execute(&command).await?;
     Ok(())
-}
-
-pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
-    let mut tasks = Vec::new();
-    let mut seen_samples = HashSet::new();
-
-    for file_name in reads {
-        if let Some((sample, _suffix)) = file_name.split_once('_') {
-            if seen_samples.insert(sample.to_string()) {
-                tasks.push(Item {
-                    id: Uuid::new_v4(),
-                    sample: sample.to_string(),
-                    is_checked: false,
-                });
-            }
-        }
-    }
-    tasks
-}
-
-pub fn ssh_key_path() -> Result<String, String> {
-    if let Some(user_dirs) = UserDirs::new() {
-        let path = user_dirs.home_dir().join(".ssh").join("id_rsa");
-        if path.exists() {
-            match path.to_str() {
-                Some(path_str) => Ok(path_str.to_string()),
-                None => Err("Failed to convert SSH key path to string".to_string()),
-            }
-        } else {
-            Err(format!("SSH key file does not exist at: {:?}", path))
-        }
-    } else {
-        Err("Failed to determine the user's home directory".to_string())
-    }
 }
 
 pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
@@ -146,6 +108,61 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
         }
     }
     Ok(())
+}
+
+pub async fn delete_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
+    let command = format!("rm {}/*", REMOTE_RESULTS_DIR);
+    client.execute(&command).await?;
+    let directory = UserDirs::new().unwrap().home_dir().join("tb-profiler-results");
+        if !directory.is_dir() {
+            println!("Directory does not exist: {:?}", directory);
+            return Ok(());
+        }
+        for entry in fs::read_dir(&directory)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() {
+                fs::remove_file(&path)?;
+                println!("Deleted file: {:?}", path);
+            }
+        }
+        println!("All files in {:?} have been deleted.", directory);
+    Ok(())
+}
+
+
+pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
+    let mut tasks = Vec::new();
+    let mut seen_samples = HashSet::new();
+
+    for file_name in reads {
+        if let Some((sample, _suffix)) = file_name.split_once('_') {
+            if seen_samples.insert(sample.to_string()) {
+                tasks.push(Item {
+                    id: Uuid::new_v4(),
+                    sample: sample.to_string(),
+                    is_checked: false,
+                });
+            }
+        }
+    }
+    tasks
+}
+
+pub fn ssh_key_path() -> Result<String, String> {
+    if let Some(user_dirs) = UserDirs::new() {
+        let path = user_dirs.home_dir().join(".ssh").join("id_rsa");
+        if path.exists() {
+            match path.to_str() {
+                Some(path_str) => Ok(path_str.to_string()),
+                None => Err("Failed to convert SSH key path to string".to_string()),
+            }
+        } else {
+            Err(format!("SSH key file does not exist at: {:?}", path))
+        }
+    } else {
+        Err("Failed to determine the user's home directory".to_string())
+    }
 }
 
 pub fn log_error(message: &str) {

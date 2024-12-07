@@ -50,6 +50,7 @@ enum Message {
     RunTbProfiler,
     ProfilerRunCompleted,
     DownloadResults,
+    DeleteResults,
 }
 
 impl Tbgui {
@@ -143,6 +144,19 @@ impl Tbgui {
                             |_| Message::ProfilerRunCompleted,
                         )
                     }
+                    Message::DeleteResults => {
+                        let client = state.client.clone();
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    if let Err(e) = delete_results(&client).await {
+                                        eprintln!("Error deleting results: {:?}", e);
+                                    }
+                                }
+                            },
+                            |_| Message::ProfilerRunCompleted,
+                        )
+                    }
                 };
                 command
             }
@@ -164,7 +178,7 @@ impl Tbgui {
                 let run_controls = row![
                     button("Run Profiler").on_press(Message::RunTbProfiler),
                     button("Download Results").on_press(Message::DownloadResults),
-                    button("Delete Results").on_press(Message::DownloadResults),
+                    button("Delete Results").on_press(Message::DeleteResults),
                     ]
                     .spacing(20);
                 let controls = view_controls(items, *filter);
