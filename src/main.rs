@@ -2,15 +2,15 @@ mod utils;
 use utils::*;
 
 use async_ssh2_tokio::client::Client;
-use iced::{keyboard, time};
 use iced::widget::{
     self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
 };
 use iced::window;
+//use iced::{keyboard, time};
+use iced::keyboard;
 use iced::{Center, Element, Fill, Subscription, Task};
+//use std::time::Duration;
 use uuid::Uuid;
-use std::time::Duration;
-
 
 const USERNAME: &str = "mimeul";
 const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
@@ -116,26 +116,32 @@ impl Tbgui {
                             .join(",");
                         println!("Running TB-Profiler for samples: {}", samples);
                         let client = state.client.clone();
-                        Task::perform(async move {
-                            if let Some(client) = client {
-                                if let Err(e) = run_tbprofiler(&client, items_checked, samples).await {
-                                    eprintln!("Error running tbprofiler: {:?}", e);
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    if let Err(e) =
+                                        run_tbprofiler(&client, items_checked, samples).await
+                                    {
+                                        eprintln!("Error running tbprofiler: {:?}", e);
+                                    }
                                 }
-                            }
-                        }, |_| Message::ProfilerRunCompleted)
+                            },
+                            |_| Message::ProfilerRunCompleted,
+                        )
                     }
-                    Message::ProfilerRunCompleted => {
-                        Task::none()
-                    }
+                    Message::ProfilerRunCompleted => Task::none(),
                     Message::DownloadResults => {
                         let client = state.client.clone();
-                        Task::perform(async move {
-                            if let Some(client) = client {
-                                if let Err(e) = download_results(&client).await {
-                                    eprintln!("Error downloading results: {:?}", e);
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    if let Err(e) = download_results(&client).await {
+                                        eprintln!("Error downloading results: {:?}", e);
+                                    }
                                 }
-                            }
-                        }, |_| Message::ProfilerRunCompleted)
+                            },
+                            |_| Message::ProfilerRunCompleted,
+                        )
                     }
                 };
                 command
@@ -153,9 +159,14 @@ impl Tbgui {
                     .color([0.5, 0.5, 0.5])
                     .align_x(Center);
 
-                let button = button("Run Profiler").on_press(Message::RunTbProfiler);
+                //let button = button("Run Profiler").on_press(Message::RunTbProfiler);
                 //let button: Element<Message> = button("Run Profiler").into();
-
+                let run_controls = row![
+                    button("Run Profiler").on_press(Message::RunTbProfiler),
+                    button("Download Results").on_press(Message::DownloadResults),
+                    button("Delete Results").on_press(Message::DownloadResults),
+                    ]
+                    .spacing(20);
                 let controls = view_controls(items, *filter);
                 let filtered_items = items.iter().filter(|item| filter.matches(item));
 
@@ -183,7 +194,7 @@ impl Tbgui {
                     })
                 };
 
-                let content = column![title, button, controls, items]
+                let content = column![title, run_controls, controls, items]
                     .spacing(20)
                     .max_width(800);
 
@@ -195,7 +206,8 @@ impl Tbgui {
     fn subscription(&self) -> Subscription<Message> {
         use keyboard::key;
 
-        let keyboard_subscription = keyboard::on_key_press(|key, modifiers| {
+        //let keyboard_subscription = keyboard::on_key_press(|key, modifiers| {
+        keyboard::on_key_press(|key, modifiers| {
             let keyboard::Key::Named(key) = key else {
                 return None;
             };
@@ -212,10 +224,9 @@ impl Tbgui {
                 }
                 _ => None,
             }
-        });
-        let periodic_subscription = time::every(Duration::from_secs(9 * 60)).map(|_| Message::DownloadResults);
-
-        Subscription::batch(vec![keyboard_subscription, periodic_subscription])
+        })
+        //let periodic_subscription = time::every(Duration::from_secs(9 * 60)).map(|_| Message::DownloadResults);
+        //Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
 }
 
