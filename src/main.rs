@@ -266,13 +266,12 @@ impl Item {
     }
 
     fn view(&self) -> Element<ItemMessage> {
-        let checkbox = checkbox(&self.sample, self.is_checked)
+        checkbox(&self.sample, self.is_checked)
             .on_toggle(ItemMessage::CheckboxToggled)
             .width(Fill)
             .size(17)
-            .text_shaping(text::Shaping::Advanced);
-
-        row![checkbox,].spacing(20).align_y(Center).into()
+            .text_shaping(text::Shaping::Advanced)
+            .into()
     }
 }
 
