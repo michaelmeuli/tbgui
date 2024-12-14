@@ -38,6 +38,7 @@ struct State {
     filter: Filter,
     items: Vec<Item>,
     client: Option<Client>,
+    error_message: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -73,8 +74,11 @@ impl Tbgui {
                             ..State::default()
                         });
                     }
-                    Message::Loaded(Err(_)) => {
-                        *self = Tbgui::Loaded(State::default());
+                    Message::Loaded(Err(e)) => {
+                        *self = Tbgui::Loaded(State {
+                            error_message: Some(e.error),
+                            ..State::default()
+                        });
                     }
                     _ => {}
                 }
@@ -166,7 +170,7 @@ impl Tbgui {
     fn view(&self) -> Element<Message> {
         match self {
             Tbgui::Loading => loading_message(),
-            Tbgui::Loaded(State { filter, items, .. }) => {
+            Tbgui::Loaded(State { filter, items, error_message, .. }) => {
                 let title = text("TB-Profiler")
                     .width(Fill)
                     .size(60)
@@ -179,8 +183,8 @@ impl Tbgui {
                     button("Run Profiler").on_press(Message::RunTbProfiler),
                     button("Download Results").on_press(Message::DownloadResults),
                     button("Delete Results").on_press(Message::DeleteResults),
-                    ]
-                    .spacing(20);
+                ]
+                .spacing(20);
                 let controls = view_controls(items, *filter);
                 let filtered_items = items.iter().filter(|item| filter.matches(item));
 
@@ -201,11 +205,15 @@ impl Tbgui {
                     .spacing(10)
                     .into()
                 } else {
-                    empty_message(match filter {
-                        Filter::All => "You have not created a item yet...",
-                        Filter::Unchecked => "All your items are done! :D",
-                        Filter::Checked => "You have not completed a item yet...",
-                    })
+                    if let Some(error) = error_message {
+                        empty_message(error)
+                    } else {
+                        empty_message(match filter {
+                            Filter::All => "No raw read sequences found...",
+                            Filter::Unchecked => "All raw read sequences selected...",
+                            Filter::Checked => "No raw read sequences selected...",
+                        })
+                    }
                 };
 
                 let content = column![title, run_controls, controls, items]
@@ -343,8 +351,8 @@ fn empty_message(message: &str) -> Element<'_, Message> {
 }
 
 #[derive(Debug, Clone)]
-enum LoadError {
-    SSH,
+struct LoadError {
+    error: String,
 }
 
 #[derive(Debug, Clone)]
@@ -358,7 +366,9 @@ async fn load() -> Result<RemoteState, LoadError> {
     match create_client().await {
         Ok(client) => {
             println!("Connected to the server");
-            let reads = get_raw_reads(&client).await.map_err(|_| LoadError::SSH)?;
+            let reads = get_raw_reads(&client).await.map_err(|e| LoadError {
+                error: e.to_string(),
+            })?;
 
             let tasks = create_tasks(reads);
             Ok(RemoteState {
@@ -370,7 +380,7 @@ async fn load() -> Result<RemoteState, LoadError> {
             let error = format!("{}", e);
             println!("{}", e);
             log_error(error.as_str());
-            Err(LoadError::SSH)
+            Err(LoadError { error })
         }
     }
 }

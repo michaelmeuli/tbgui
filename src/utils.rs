@@ -21,7 +21,6 @@ pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
         ServerCheckMethod::NoCheck,
     )
     .await?;
-
     Ok(client)
 }
 
