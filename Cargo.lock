@@ -3374,22 +3374,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rstodo"
-version = "0.1.0"
-dependencies = [
- "async-ssh2-tokio",
- "async-std",
- "directories-next",
- "iced",
- "russh-sftp",
- "serde",
- "serde_json",
- "tokio",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "russh"
 version = "0.45.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4042,6 +4026,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e801cf239ecd6ccd71f03d270d67dd53d13e90aab208bf4b8fe4ad957ea949b0"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "tbgui"
+version = "0.1.0"
+dependencies = [
+ "async-ssh2-tokio",
+ "async-std",
+ "directories-next",
+ "iced",
+ "russh-sftp",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
