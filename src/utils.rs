@@ -12,18 +12,7 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 
 pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
-    let key_path = match ssh_key_path() {
-        Ok(path) => path,
-        Err(_e) => {
-            println!("create_client(): Failed to get SSH key path.");
-            log_error("create_client(): Failed to get SSH key path.");
-            return Err(async_ssh2_tokio::Error::IoError(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "SSH key path not found",
-            )));
-        }
-    };
-
+    let key_path = UserDirs::new().unwrap().home_dir().join(".ssh").join("id_rsa");
     let auth_method = AuthMethod::with_key_file(key_path, None);
     let client = Client::connect(
         ("130.60.24.133", 22),
@@ -147,22 +136,6 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
         }
     }
     tasks
-}
-
-pub fn ssh_key_path() -> Result<String, String> {
-    if let Some(user_dirs) = UserDirs::new() {
-        let path = user_dirs.home_dir().join(".ssh").join("id_rsa");
-        if path.exists() {
-            match path.to_str() {
-                Some(path_str) => Ok(path_str.to_string()),
-                None => Err("Failed to convert SSH key path to string".to_string()),
-            }
-        } else {
-            Err(format!("SSH key file does not exist at: {:?}", path))
-        }
-    } else {
-        Err("Failed to determine the user's home directory".to_string())
-    }
 }
 
 pub fn log_error(message: &str) {

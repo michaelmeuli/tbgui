@@ -367,8 +367,8 @@ async fn load() -> Result<RemoteState, LoadError> {
             })
         }
         Err(e) => {
-            let error = format!("load(): Failed to connect to the server: {}", e);
-            println!("{}", error);
+            let error = format!("{}", e);
+            println!("{}", e);
             log_error(error.as_str());
             Err(LoadError::SSH)
         }
