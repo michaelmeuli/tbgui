@@ -35,6 +35,7 @@ enum Tbgui {
 
 #[derive(Debug, Default)]
 struct State {
+    screen: Screen,
     filter: Filter,
     items: Vec<Item>,
     client: Option<Client>,
@@ -52,6 +53,7 @@ enum Message {
     ProfilerRunCompleted,
     DownloadResults,
     DeleteResults,
+    SettingsPressed,
 }
 
 impl Tbgui {
@@ -165,6 +167,10 @@ impl Tbgui {
                             |_| Message::ProfilerRunCompleted,
                         )
                     }
+                    Message::SettingsPressed => {
+                        state.screen = Screen::Settings;
+                        Task::none()
+                    }
                 };
                 command
             }
@@ -260,6 +266,17 @@ impl Tbgui {
         //let periodic_subscription = time::every(Duration::from_secs(9 * 60)).map(|_| Message::DownloadResults);
         //Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
+}
+
+
+
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum Screen {
+    #[default]
+    Home,
+    Settings,
 }
 
 #[derive(Debug, Clone)]
@@ -365,7 +382,7 @@ fn gear_button() -> Element<'static, Message> {
         "{}/icons/gear-solid.svg",
         env!("CARGO_MANIFEST_DIR")
     ));
-    button(svg(handle).width(20).height(20)).into()
+    button(svg(handle).width(20).height(20)).on_press(Message::SettingsPressed).into()
 }
 
 #[derive(Debug, Clone)]
