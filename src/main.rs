@@ -3,7 +3,7 @@ use utils::*;
 
 use async_ssh2_tokio::client::Client;
 use iced::widget::{
-    self, button, center, checkbox, column, container, keyed_column, row, scrollable, text,
+    self, button, center, checkbox, column, container, keyed_column, row, scrollable, svg, text,
 };
 use iced::window;
 //use iced::{keyboard, time};
@@ -23,7 +23,7 @@ pub fn main() -> iced::Result {
     iced::application(Tbgui::title, Tbgui::update, Tbgui::view)
         .subscription(Tbgui::subscription)
         .font(include_bytes!("../fonts/icons.ttf").as_slice())
-        .window_size((500.0, 800.0))
+        .window_size((550.0, 800.0))
         .run_with(Tbgui::new)
 }
 
@@ -56,7 +56,11 @@ enum Message {
 
 impl Tbgui {
     fn new() -> (Self, Task<Message>) {
-        (Self::Loading, Task::perform(load(), Message::Loaded))
+        //(Self::Loading, Task::perform(load(), Message::Loaded))
+        (
+            Tbgui::Loaded(State::default()),
+            Task::perform(load(), Message::Loaded),
+        )
     }
 
     fn title(&self) -> String {
@@ -170,7 +174,12 @@ impl Tbgui {
     fn view(&self) -> Element<Message> {
         match self {
             Tbgui::Loading => loading_message(),
-            Tbgui::Loaded(State { filter, items, error_message, .. }) => {
+            Tbgui::Loaded(State {
+                filter,
+                items,
+                error_message,
+                ..
+            }) => {
                 let title = text("TB-Profiler")
                     .width(Fill)
                     .size(60)
@@ -183,6 +192,7 @@ impl Tbgui {
                     button("Run Profiler").on_press(Message::RunTbProfiler),
                     button("Download Results").on_press(Message::DownloadResults),
                     button("Delete Results").on_press(Message::DeleteResults),
+                    gear_button(),
                 ]
                 .spacing(20);
                 let controls = view_controls(items, *filter);
@@ -348,6 +358,14 @@ fn empty_message(message: &str) -> Element<'_, Message> {
     )
     .height(200)
     .into()
+}
+
+fn gear_button() -> Element<'static, Message> {
+    let handle = svg::Handle::from_path(format!(
+        "{}/icons/gear-solid.svg",
+        env!("CARGO_MANIFEST_DIR")
+    ));
+    button(svg(handle).width(20).height(20)).into()
 }
 
 #[derive(Debug, Clone)]
