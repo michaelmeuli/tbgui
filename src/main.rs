@@ -54,6 +54,7 @@ enum Message {
     DownloadResults,
     DeleteResults,
     SettingsPressed,
+    HomePressed,
 }
 
 impl Tbgui {
@@ -171,6 +172,10 @@ impl Tbgui {
                         state.screen = Screen::Settings;
                         Task::none()
                     }
+                    Message::HomePressed => {
+                        state.screen = Screen::Home;
+                        Task::none()
+                    }
                 };
                 command
             }
@@ -180,13 +185,18 @@ impl Tbgui {
     fn view(&self) -> Element<Message> {
         match self {
             Tbgui::Loading => loading_message(),
-            Tbgui::Loaded(State {
+
+            Tbgui::Loaded(State { 
+                screen,
                 filter,
                 items,
                 error_message,
                 ..
-            }) => {
-                let title = text("TB-Profiler")
+            }) => match screen {
+                //Screen::Home => self.view_home(),
+                //Screen::Settings => self.view_settings(),
+                Screen::Home => {
+                    let title = text("TB-Profiler")
                     .width(Fill)
                     .size(60)
                     .color([0.5, 0.5, 0.5])
@@ -237,7 +247,22 @@ impl Tbgui {
                     .max_width(800);
 
                 scrollable(container(content).center_x(Fill).padding(40)).into()
-            }
+
+                }
+                Screen::Settings => {
+                    let title = text("Settings")
+                        .width(Fill)
+                        .size(60)
+                        .color([0.5, 0.5, 0.5])
+                        .align_x(Center);
+                    let home = button("Home").on_press(Message::HomePressed);
+    
+                    let content = column![title, home].spacing(20).max_width(800);
+    
+                    scrollable(container(content).center_x(Fill).padding(40)).into()
+                }
+            },
+
         }
     }
 
