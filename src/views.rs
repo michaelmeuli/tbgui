@@ -1,7 +1,6 @@
-use iced::widget::{button, column, container, keyed_column, row, scrollable, text};
+use crate::{Filter, Item, Message};
+use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
 use iced::{Center, Element, Fill};
-use crate::{Filter, Item, Message, empty_message, gear_button, view_controls};
-
 
 pub fn view_home<'a>(
     filter: &'a Filter,
@@ -53,5 +52,87 @@ pub fn view_home<'a>(
         }
     };
 
-    scrollable(container(column![title, run_controls, controls, items].spacing(20).max_width(800)).center_x(Fill).padding(40)).into()
+    scrollable(
+        container(
+            column![title, run_controls, controls, items]
+                .spacing(20)
+                .max_width(800),
+        )
+        .center_x(Fill)
+        .padding(40),
+    )
+    .into()
+}
+
+pub fn view_settings<'a>() -> Element<'a, Message> {
+    let title = text("Settings")
+        .width(Fill)
+        .size(60)
+        .color([0.5, 0.5, 0.5])
+        .align_x(Center);
+
+    let home_button = button("Home").on_press(Message::HomePressed);
+
+    let content = column![title, home_button].spacing(20).max_width(800);
+
+    scrollable(container(content).center_x(Fill).padding(40)).into()
+}
+
+fn view_controls(items: &[Item], current_filter: Filter) -> Element<Message> {
+    let items_checked = items.iter().filter(|item| item.is_checked).count();
+
+    let filter_button = |label, filter, current_filter| {
+        let label = text(label);
+
+        let button = button(label).style(if filter == current_filter {
+            button::primary
+        } else {
+            button::text
+        });
+
+        button.on_press(Message::FilterChanged(filter)).padding(8)
+    };
+
+    row![
+        text!(
+            "{items_checked} {} selected",
+            if items_checked == 1 { "item" } else { "items" }
+        )
+        .width(Fill),
+        row![
+            filter_button("All", Filter::All, current_filter),
+            filter_button("Unchecked", Filter::Unchecked, current_filter),
+            filter_button("Checked", Filter::Checked, current_filter,),
+        ]
+        .spacing(10)
+    ]
+    .spacing(20)
+    .align_y(Center)
+    .into()
+}
+
+pub fn loading_message<'a>() -> Element<'a, Message> {
+    center(text("Loading...").width(Fill).align_x(Center).size(50)).into()
+}
+
+pub fn empty_message(message: &str) -> Element<'_, Message> {
+    center(
+        text(message)
+            .width(Fill)
+            .size(25)
+            .align_x(Center)
+            .color([0.7, 0.7, 0.7]),
+    )
+    .height(200)
+    .into()
+}
+
+pub fn gear_button() -> Element<'static, Message> {
+    let handle = svg::Handle::from_path(format!(
+        "{}/icons/gear-solid.svg",
+        env!("CARGO_MANIFEST_DIR")
+    ));
+    button(svg(handle).width(20).height(20))
+        .on_press(Message::SettingsPressed)
+        .into()
 }

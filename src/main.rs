@@ -1,16 +1,14 @@
-mod views;
 mod utils;
+mod views;
 use utils::*;
 use views::*;
 
 use async_ssh2_tokio::client::Client;
-use iced::widget::{
-    self, button, center, checkbox, column, container, row, scrollable, svg, text,
-};
+use iced::widget::{self, checkbox, text};
 use iced::window;
 //use iced::{keyboard, time};
 use iced::keyboard;
-use iced::{Center, Element, Fill, Subscription, Task};
+use iced::{Element, Fill, Subscription, Task};
 //use std::time::Duration;
 use uuid::Uuid;
 
@@ -25,7 +23,7 @@ pub fn main() -> iced::Result {
     iced::application(Tbgui::title, Tbgui::update, Tbgui::view)
         .subscription(Tbgui::subscription)
         .font(include_bytes!("../fonts/icons.ttf").as_slice())
-        .window_size((550.0, 800.0))
+        .window_size((570.0, 800.0))
         .run_with(Tbgui::new)
 }
 
@@ -187,32 +185,16 @@ impl Tbgui {
     fn view(&self) -> Element<Message> {
         match self {
             Tbgui::Loading => loading_message(),
-
-            Tbgui::Loaded(State { 
+            Tbgui::Loaded(State {
                 screen,
                 filter,
                 items,
                 error_message,
                 ..
             }) => match screen {
-                //Screen::Home => self.view_home(),
-                //Screen::Settings => self.view_settings(),
                 Screen::Home => view_home(filter, items, error_message),
-     
-                Screen::Settings => {
-                    let title = text("Settings")
-                        .width(Fill)
-                        .size(60)
-                        .color([0.5, 0.5, 0.5])
-                        .align_x(Center);
-                    let home = button("Home").on_press(Message::HomePressed);
-    
-                    let content = column![title, home].spacing(20).max_width(800);
-    
-                    scrollable(container(content).center_x(Fill).padding(40)).into()
-                }
+                Screen::Settings => view_settings(),
             },
-
         }
     }
 
@@ -241,12 +223,7 @@ impl Tbgui {
         //let periodic_subscription = time::every(Duration::from_secs(9 * 60)).map(|_| Message::DownloadResults);
         //Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
-
 }
-
-
-
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 enum Screen {
@@ -286,39 +263,6 @@ impl Item {
     }
 }
 
-fn view_controls(items: &[Item], current_filter: Filter) -> Element<Message> {
-    let items_checked = items.iter().filter(|item| item.is_checked).count();
-
-    let filter_button = |label, filter, current_filter| {
-        let label = text(label);
-
-        let button = button(label).style(if filter == current_filter {
-            button::primary
-        } else {
-            button::text
-        });
-
-        button.on_press(Message::FilterChanged(filter)).padding(8)
-    };
-
-    row![
-        text!(
-            "{items_checked} {} selected",
-            if items_checked == 1 { "item" } else { "items" }
-        )
-        .width(Fill),
-        row![
-            filter_button("All", Filter::All, current_filter),
-            filter_button("Unchecked", Filter::Unchecked, current_filter),
-            filter_button("Checked", Filter::Checked, current_filter,),
-        ]
-        .spacing(10)
-    ]
-    .spacing(20)
-    .align_y(Center)
-    .into()
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Filter {
     #[default]
@@ -335,30 +279,6 @@ impl Filter {
             Filter::Checked => item.is_checked,
         }
     }
-}
-
-fn loading_message<'a>() -> Element<'a, Message> {
-    center(text("Loading...").width(Fill).align_x(Center).size(50)).into()
-}
-
-fn empty_message(message: &str) -> Element<'_, Message> {
-    center(
-        text(message)
-            .width(Fill)
-            .size(25)
-            .align_x(Center)
-            .color([0.7, 0.7, 0.7]),
-    )
-    .height(200)
-    .into()
-}
-
-fn gear_button() -> Element<'static, Message> {
-    let handle = svg::Handle::from_path(format!(
-        "{}/icons/gear-solid.svg",
-        env!("CARGO_MANIFEST_DIR")
-    ));
-    button(svg(handle).width(20).height(20)).on_press(Message::SettingsPressed).into()
 }
 
 #[derive(Debug, Clone)]
