@@ -1,4 +1,4 @@
-use crate::{Filter, Item, Message};
+use crate::types::{Filter, Item, Message};
 use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
 use iced::{Center, Element, Fill};
 

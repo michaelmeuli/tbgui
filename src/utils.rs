@@ -1,4 +1,5 @@
-use crate::{Item, REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USERNAME, REMOTE_RESULTS_DIR};
+use crate::types::{Item, LoadError, RemoteState};
+use crate::{REMOTE_RAW_DIR, REMOTE_RESULTS_DIR, TB_PROFILER_SCRIPT, USERNAME};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use russh_sftp::client::fs::ReadDir;
@@ -7,12 +8,16 @@ use std::collections::HashSet;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use tokio::fs::File;
-use uuid::Uuid;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
+use uuid::Uuid;
 
 pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
-    let key_path = UserDirs::new().unwrap().home_dir().join(".ssh").join("id_rsa");
+    let key_path = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join(".ssh")
+        .join("id_rsa");
     let auth_method = AuthMethod::with_key_file(key_path, None);
     let client = Client::connect(
         ("130.60.24.133", 22),
@@ -47,7 +52,11 @@ pub async fn get_raw_reads(client: &Client) -> Result<Vec<String>, async_ssh2_to
     Ok(raw_reads)
 }
 
-pub async fn run_tbprofiler(client: &Client, items_checked: usize, samples: String,) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn run_tbprofiler(
+    client: &Client,
+    items_checked: usize,
+    samples: String,
+) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!(
         "sbatch --array 0-{} {} \"{}\"",
         items_checked - 1,
@@ -65,7 +74,10 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     let remote_dir = REMOTE_RESULTS_DIR;
-    let local_dir = UserDirs::new().unwrap().home_dir().join("tb-profiler-results");
+    let local_dir = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("tb-profiler-results");
     tokio::fs::create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
@@ -101,23 +113,25 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
 pub async fn delete_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!("rm {}/*", REMOTE_RESULTS_DIR);
     client.execute(&command).await?;
-    let directory = UserDirs::new().unwrap().home_dir().join("tb-profiler-results");
-        if !directory.is_dir() {
-            println!("Directory does not exist: {:?}", directory);
-            return Ok(());
+    let directory = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("tb-profiler-results");
+    if !directory.is_dir() {
+        println!("Directory does not exist: {:?}", directory);
+        return Ok(());
+    }
+    for entry in fs::read_dir(&directory)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_file() {
+            fs::remove_file(&path)?;
+            println!("Deleted file: {:?}", path);
         }
-        for entry in fs::read_dir(&directory)? {
-            let entry = entry?;
-            let path = entry.path();
-            if path.is_file() {
-                fs::remove_file(&path)?;
-                println!("Deleted file: {:?}", path);
-            }
-        }
-        println!("All files in {:?} have been deleted.", directory);
+    }
+    println!("All files in {:?} have been deleted.", directory);
     Ok(())
 }
-
 
 pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     let mut tasks = Vec::new();
@@ -137,8 +151,36 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     tasks
 }
 
+pub async fn load() -> Result<RemoteState, LoadError> {
+    delete_log_file();
+    match create_client().await {
+        Ok(client) => {
+            println!("Connected to the server");
+            let reads = get_raw_reads(&client).await.map_err(|e| LoadError {
+                error: e.to_string(),
+            })?;
+
+            let tasks = create_tasks(reads);
+            Ok(RemoteState {
+                client,
+                items: tasks,
+            })
+        }
+        Err(e) => {
+            let error = format!("{}", e);
+            println!("{}", e);
+            log_error(error.as_str());
+            Err(LoadError { error })
+        }
+    }
+}
+
 pub fn log_error(message: &str) {
-    let error_file = UserDirs::new().unwrap().home_dir().join("tb-profiler-results").join("error.log");
+    let error_file = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("tb-profiler-results")
+        .join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
         .write(true)
@@ -149,11 +191,18 @@ pub fn log_error(message: &str) {
 }
 
 pub fn delete_log_file() {
-    let error_file = UserDirs::new().unwrap().home_dir().join("tb-profiler-results").join("error.log");
+    let error_file = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("tb-profiler-results")
+        .join("error.log");
     println!("Attempting to delete: {:?}", error_file);
     if fs::remove_file(&error_file).is_ok() {
         println!("File {:?} deleted successfully.", error_file);
     } else {
-        println!("Failed to delete the file {:?}. It may not exist.", error_file);
+        println!(
+            "Failed to delete the file {:?}. It may not exist.",
+            error_file
+        );
     }
 }
