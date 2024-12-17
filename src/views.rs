@@ -1,6 +1,5 @@
 use crate::types::{Filter, Item, Message};
 use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
-use iced::window::settings;
 use iced::{Center, Element, Fill};
 
 pub fn view_home<'a>(
@@ -76,14 +75,17 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         env!("CARGO_MANIFEST_DIR")
     ));
     let controls = row![
-        button("Home").on_press(Message::HomePressed)
-        .width(Fill),
-        button(svg(handle).width(20).height(20))
-        .on_press(Message::SettingsPressed)
-        .into()
-    ];
+        button("Home").on_press(Message::HomePressed).width(80),
+        button(svg(handle).width(20).height(20)).on_press(Message::SettingsPressed),
+    ]
+    .spacing(360);
+    let template = column![
+        button("Download default template").on_press(Message::HomePressed).width(250),
+        button("Upload user template").on_press(Message::HomePressed).width(250),
+    ]
+    .spacing(20);
 
-    let content = column![title, controls].spacing(20).max_width(800);
+    let content = column![title, controls, template].spacing(20).max_width(800);
 
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
@@ -146,4 +148,3 @@ pub fn gear_button() -> Element<'static, Message> {
         .on_press(Message::SettingsPressed)
         .into()
 }
-
