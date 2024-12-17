@@ -1,5 +1,6 @@
 use crate::types::{Filter, Item, Message};
 use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
+use iced::window::settings;
 use iced::{Center, Element, Fill};
 
 pub fn view_home<'a>(
@@ -70,10 +71,19 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         .size(60)
         .color([0.5, 0.5, 0.5])
         .align_x(Center);
+    let handle = svg::Handle::from_path(format!(
+        "{}/icons/gear-solid.svg",
+        env!("CARGO_MANIFEST_DIR")
+    ));
+    let controls = row![
+        button("Home").on_press(Message::HomePressed)
+        .width(Fill),
+        button(svg(handle).width(20).height(20))
+        .on_press(Message::SettingsPressed)
+        .into()
+    ];
 
-    let home_button = button("Home").on_press(Message::HomePressed);
-
-    let content = column![title, home_button].spacing(20).max_width(800);
+    let content = column![title, controls].spacing(20).max_width(800);
 
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
@@ -136,3 +146,4 @@ pub fn gear_button() -> Element<'static, Message> {
         .on_press(Message::SettingsPressed)
         .into()
 }
+
