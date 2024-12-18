@@ -1,6 +1,6 @@
 use crate::types::{Item, LoadError, RemoteState};
 use crate::{
-    DEFAULT_TEMPLATE_REMOTE, REMOTE_RAW_DIR, REMOTE_RESULTS_DIR, TB_PROFILER_SCRIPT, USERNAME,
+    DEFAULT_TEMPLATE_REMOTE, REMOTE_RAW_DIR, REMOTE_RESULTS_DIR, TB_PROFILER_SCRIPT, USERNAME, USER_TEMPLATE_REMOTE
 };
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
@@ -138,6 +138,22 @@ pub async fn download_default_template(client: &Client) -> Result<(), async_ssh2
 
     if let Err(e) = download_file(&sftp, &remote_file_path, &local_file_path).await {
         println!("Error downloading file: {:?}", e);
+    }
+    Ok(())
+}
+
+pub async fn upload_user_template(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
+    let remote_file_path = USER_TEMPLATE_REMOTE;
+    let local_file_path = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("tb-profiler-results")
+        .join("user_template.docx");
+
+    let channel = client.get_channel().await?;
+    channel.request_subsystem(true, "sftp").await?;
+    if let Err(e) = client.upload_file(local_file_path, remote_file_path).await {
+        println!("Error uploading file: {:?}", e);
     }
     Ok(())
 }
