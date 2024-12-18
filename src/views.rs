@@ -1,4 +1,5 @@
 use crate::types::{Filter, Item, Message};
+use iced::mouse::Button;
 use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
 use iced::{Center, Element, Fill};
 
@@ -17,7 +18,7 @@ pub fn view_home<'a>(
         button("Run Profiler").on_press(Message::RunTbProfiler),
         button("Download Results").on_press(Message::DownloadResults),
         button("Delete Results").on_press(Message::DeleteResults),
-        gear_button(),
+        gear_button().on_press(Message::SettingsPressed),
     ]
     .spacing(20);
 
@@ -76,7 +77,7 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     ));
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
-        button(svg(handle).width(20).height(20)).on_press(Message::SettingsPressed),
+        gear_button().on_press(Message::HomePressed),
     ]
     .spacing(360);
     let template = column![
@@ -139,12 +140,10 @@ pub fn empty_message(message: &str) -> Element<'_, Message> {
     .into()
 }
 
-pub fn gear_button() -> Element<'static, Message> {
+pub fn gear_button() -> iced::widget::Button<'static, Message> {
     let handle = svg::Handle::from_path(format!(
         "{}/icons/gear-solid.svg",
         env!("CARGO_MANIFEST_DIR")
     ));
     button(svg(handle).width(20).height(20))
-        .on_press(Message::SettingsPressed)
-        .into()
 }
