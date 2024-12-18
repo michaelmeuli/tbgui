@@ -21,11 +21,17 @@ pub enum Message {
     TabPressed { shift: bool },
     ToggleFullscreen(window::Mode),
     RunTbProfiler,
-    ProfilerRunCompleted,
     DownloadResults,
     DeleteResults,
     SettingsPressed,
     HomePressed,
+    ProfilerRunCompleted,
+    DownloadDefaultTemplate,
+    UploadUserTemplate,
+    DownloadedResults,
+    DeletedResults,
+    DownloadedDefaultTemplate,
+    UploadedUserTemplate,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

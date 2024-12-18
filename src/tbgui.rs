@@ -97,7 +97,6 @@ impl Tbgui {
                             |_| Message::ProfilerRunCompleted,
                         )
                     }
-                    Message::ProfilerRunCompleted => Task::none(),
                     Message::DownloadResults => {
                         let client = state.client.clone();
                         Task::perform(
@@ -108,7 +107,7 @@ impl Tbgui {
                                     }
                                 }
                             },
-                            |_| Message::ProfilerRunCompleted,
+                            |_| Message::DownloadedResults,
                         )
                     }
                     Message::DeleteResults => {
@@ -121,7 +120,7 @@ impl Tbgui {
                                     }
                                 }
                             },
-                            |_| Message::ProfilerRunCompleted,
+                            |_| Message::DeletedResults,
                         )
                     }
                     Message::SettingsPressed => {
@@ -132,6 +131,37 @@ impl Tbgui {
                         state.screen = Screen::Home;
                         Task::none()
                     }
+                    Message::DownloadDefaultTemplate => {
+                        let client = state.client.clone();
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    if let Err(e) = download_default_template(&client).await {
+                                        println!("Error downloading default template: {:?}", e);
+                                    }
+                                }
+                            },
+                            |_| Message::DownloadedDefaultTemplate,
+                        )
+                    }
+                    Message::UploadUserTemplate => {
+                        let client = state.client.clone();
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    if let Err(e) = upload_user_template(&client).await {
+                                        println!("Error uploading user template: {:?}", e);
+                                    }
+                                }
+                            },
+                            |_| Message::UploadedUserTemplate,
+                        )
+                    }
+                    Message::ProfilerRunCompleted => Task::none(),
+                    Message::DownloadedResults => Task::none(),
+                    Message::DeletedResults => Task::none(),
+                    Message::DownloadedDefaultTemplate => Task::none(),
+                    Message::UploadedUserTemplate => Task::none(),
                 };
                 command
             }

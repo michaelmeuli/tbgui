@@ -1,5 +1,7 @@
 use crate::types::{Item, LoadError, RemoteState};
-use crate::{REMOTE_RAW_DIR, REMOTE_RESULTS_DIR, TB_PROFILER_SCRIPT, USERNAME};
+use crate::{
+    DEFAULT_TEMPLATE_REMOTE, REMOTE_RAW_DIR, REMOTE_RESULTS_DIR, TB_PROFILER_SCRIPT, USERNAME,
+};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use russh_sftp::client::fs::ReadDir;
@@ -7,6 +9,7 @@ use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
+use std::path::PathBuf;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
@@ -86,25 +89,13 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
         let file_type = entry.file_type();
         //let metadata = entry.metadata();
         println!("File: {}", file_name);
+        let remote_file_path = format!("{}/{}", remote_dir, file_name);
+        let local_file_path = local_dir.join(&file_name).clone();
 
-        if file_type.is_file() && file_name.ends_with(".docx") {
-            let remote_file_path = format!("{}/{}", remote_dir, file_name);
-            let local_file_path = local_dir.join(file_name).clone();
-            println!("Downloading: {}", remote_file_path);
-            let mut remote_file = sftp
-                .open_with_flags(&remote_file_path, OpenFlags::READ)
-                .await?;
-            let mut local_file = File::create(&local_file_path).await?;
-
-            let mut buffer = [0u8; 4096];
-            loop {
-                let n = remote_file.read(&mut buffer).await?;
-                if n == 0 {
-                    break; // End of file
-                }
-                local_file.write_all(&buffer[..n]).await?;
+        if file_type.is_file() && (&file_name).ends_with(".docx") {
+            if let Err(e) = download_file(&sftp, &remote_file_path, &local_file_path).await {
+                println!("Error downloading file: {:?}", e);
             }
-            println!("File downloaded successfully to {:?}", local_file_path);
         }
     }
     Ok(())
@@ -130,6 +121,47 @@ pub async fn delete_results(client: &Client) -> Result<(), async_ssh2_tokio::Err
         }
     }
     println!("All files in {:?} have been deleted.", directory);
+    Ok(())
+}
+
+pub async fn download_default_template(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
+    let remote_file_path = DEFAULT_TEMPLATE_REMOTE;
+    let local_file_path = UserDirs::new()
+        .unwrap()
+        .home_dir()
+        .join("tb-profiler-results")
+        .join("default_template.docx");
+
+    let channel = client.get_channel().await?;
+    channel.request_subsystem(true, "sftp").await?;
+    let sftp = SftpSession::new(channel.into_stream()).await?;
+
+    if let Err(e) = download_file(&sftp, &remote_file_path, &local_file_path).await {
+        println!("Error downloading file: {:?}", e);
+    }
+    Ok(())
+}
+
+pub async fn download_file(
+    sftp: &SftpSession,
+    remote_file_path: &str,
+    local_file_path: &PathBuf,
+) -> Result<(), async_ssh2_tokio::Error> {
+    println!("Downloading: {}", remote_file_path);
+    let mut remote_file = sftp
+        .open_with_flags(remote_file_path, OpenFlags::READ)
+        .await?;
+    let mut local_file = File::create(local_file_path.clone()).await?;
+    let mut buffer = [0u8; 4096];
+
+    loop {
+        let n = remote_file.read(&mut buffer).await?;
+        if n == 0 {
+            break; // End of file
+        }
+        local_file.write_all(&buffer[..n]).await?;
+    }
+    println!("File downloaded successfully to {:?}", local_file_path);
     Ok(())
 }
 

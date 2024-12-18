@@ -76,8 +76,8 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     ]
     .spacing(360);
     let template = column![
-        button("Download default template").on_press(Message::HomePressed).width(250),
-        button("Upload user template").on_press(Message::HomePressed).width(250),
+        button("Download default template").on_press(Message::DownloadDefaultTemplate).width(250),
+        button("Upload user template").on_press(Message::UploadUserTemplate).width(250),
     ]
     .spacing(20);
 
