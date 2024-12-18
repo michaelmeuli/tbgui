@@ -1,5 +1,4 @@
 use crate::types::{Filter, Item, Message};
-use iced::mouse::Button;
 use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
 use iced::{Center, Element, Fill};
 
@@ -71,10 +70,6 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         .size(60)
         .color([0.5, 0.5, 0.5])
         .align_x(Center);
-    let handle = svg::Handle::from_path(format!(
-        "{}/icons/gear-solid.svg",
-        env!("CARGO_MANIFEST_DIR")
-    ));
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
         gear_button().on_press(Message::HomePressed),
