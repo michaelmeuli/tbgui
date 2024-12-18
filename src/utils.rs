@@ -215,8 +215,8 @@ pub async fn load() -> Result<RemoteState, LoadError> {
             })
         }
         Err(e) => {
+            println!("Failed to connect to the server: {}", e);
             let error = format!("{}", e);
-            println!("{}", e);
             log_error(error.as_str());
             Err(LoadError { error })
         }
