@@ -1,11 +1,16 @@
+use crate::types::LoadError;
+use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
+use iced::futures::TryFutureExt;
 use iced::keyboard;
 use iced::widget;
 use iced::window;
 use iced::{Element, Subscription, Task};
 
-use crate::types::{Message, Screen, State};
+//Result<SavedState, LoadError>
+//Result<T, ConfyError>
+//Result<TbguiConfig, ConfyError>
 
 #[derive(Debug)]
 pub enum Tbgui {
@@ -15,11 +20,26 @@ pub enum Tbgui {
 
 impl Tbgui {
     pub fn new() -> (Self, Task<Message>) {
-        //(Self::Loading, Task::perform(load(), Message::Loaded))
+        let cfg = async { confy::load("tbgui", None) };
         (
-            Tbgui::Loaded(State::default()),
-            Task::perform(load(), Message::Loaded),
+            Self::Loading,
+            Task::perform(
+                cfg.map_err(|e| LoadError {
+                    error: e.to_string(),
+                }),
+                Message::Loaded,
+            ),
         )
+
+        //let cfg: TbguiConfig = confy::load("tbgui", None).unwrap_or_default();
+
+        // (
+        //     Tbgui::Loaded(State {
+        //         config: cfg,
+        //         ..State::default()
+        //     }),
+        //     Task::perform(load(), Message::Loaded),
+        // )
     }
 
     pub fn title(&self) -> String {
@@ -32,23 +52,30 @@ impl Tbgui {
                 match message {
                     Message::Loaded(Ok(state)) => {
                         *self = Tbgui::Loaded(State {
-                            items: state.items,
-                            client: Some(state.client),
+                            config: state,
                             ..State::default()
                         });
                     }
-                    Message::Loaded(Err(e)) => {
-                        *self = Tbgui::Loaded(State {
-                            error_message: Some(e.error),
-                            ..State::default()
-                        });
+                    Message::Loaded(Err(_)) => {
+                        *self = Tbgui::Loaded(State::default());
                     }
                     _ => {}
                 }
-                Task::none()
+                Task::perform(load(), Message::LoadedRemoteState)
             }
             Tbgui::Loaded(state) => {
                 let command = match message {
+                    Message::LoadedRemoteState(result) => match result {
+                        Ok(remote_state) => {
+                            state.items = remote_state.items;
+                            state.client = Some(remote_state.client);
+                            Task::none()
+                        }
+                        Err(e) => {
+                            state.error_message = Some(e.error);
+                            Task::none()
+                        }
+                    },
                     Message::FilterChanged(filter) => {
                         state.filter = filter;
 

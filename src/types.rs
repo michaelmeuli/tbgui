@@ -1,3 +1,4 @@
+use crate::config::TbguiConfig;
 use async_ssh2_tokio::client::Client;
 use iced::widget::{checkbox, text};
 use iced::window;
@@ -11,11 +12,13 @@ pub struct State {
     pub items: Vec<Item>,
     pub client: Option<Client>,
     pub error_message: Option<String>,
+    pub config: TbguiConfig,
 }
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Loaded(Result<RemoteState, LoadError>),
+    Loaded(Result<TbguiConfig, LoadError>),
+    LoadedRemoteState(Result<RemoteState, LoadError>),
     FilterChanged(Filter),
     ItemMessage(usize, ItemMessage),
     TabPressed { shift: bool },
