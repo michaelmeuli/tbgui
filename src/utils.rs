@@ -1,6 +1,6 @@
 use crate::types::{Item, LoadError, RemoteState};
 use crate::{
-    REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USER_TEMPLATE_REMOTE
+    TB_PROFILER_SCRIPT, USER_TEMPLATE_REMOTE
 };
 use crate::config::TbguiConfig;
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
@@ -33,21 +33,22 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_to
     Ok(client)
 }
 
-pub async fn get_raw_reads(client: &Client) -> Result<Vec<String>, async_ssh2_tokio::Error> {
-    let command = format!("test -d {} && echo 'exists'", REMOTE_RAW_DIR);
+pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<Vec<String>, async_ssh2_tokio::Error> {
+    let remote_raw_dir: &str = config.remote_raw_dir.as_str();
+    let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
     let result = client.execute(&command).await?;
     if result.stdout.trim() != "exists" {
         log_error(&format!(
             "Directory on remote with raw reads does not exist: {}",
-            REMOTE_RAW_DIR
+            remote_raw_dir
         ));
         panic!(
             "Directory on remote with raw reads does not exist: {}",
-            REMOTE_RAW_DIR
+            remote_raw_dir
         );
     }
 
-    let command = format!("ls {}", REMOTE_RAW_DIR);
+    let command = format!("ls {}", remote_raw_dir);
     let result = client.execute(&command).await?;
     assert_eq!(result.exit_status, 0);
     let stdout = result.stdout;
@@ -205,7 +206,7 @@ pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
     match create_client(config).await {
         Ok(client) => {
             println!("Connected to the server");
-            let reads = get_raw_reads(&client).await.map_err(|e| LoadError {
+            let reads = get_raw_reads(&client, config).await.map_err(|e| LoadError {
                 error: e.to_string(),
             })?;
 

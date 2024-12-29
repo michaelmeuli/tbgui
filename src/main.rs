@@ -7,7 +7,6 @@ mod config;
 use iced;
 use tbgui::Tbgui;
 
-const REMOTE_RAW_DIR: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/raw";
 const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
 const USER_TEMPLATE_REMOTE: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/template/user_template.docx";
 
