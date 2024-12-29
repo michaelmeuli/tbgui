@@ -18,6 +18,7 @@ pub struct State {
 #[derive(Debug, Clone)]
 pub enum Message {
     Loaded(Result<TbguiConfig, LoadError>),
+    LoadRemoteState,
     LoadedRemoteState(Result<RemoteState, LoadError>),
     FilterChanged(Filter),
     ItemMessage(usize, ItemMessage),

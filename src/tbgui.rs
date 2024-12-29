@@ -8,10 +8,6 @@ use iced::widget;
 use iced::window;
 use iced::{Element, Subscription, Task};
 
-//Result<SavedState, LoadError>
-//Result<T, ConfyError>
-//Result<TbguiConfig, ConfyError>
-
 #[derive(Debug)]
 pub enum Tbgui {
     Loading,
@@ -30,16 +26,6 @@ impl Tbgui {
                 Message::Loaded,
             ),
         )
-
-        //let cfg: TbguiConfig = confy::load("tbgui", None).unwrap_or_default();
-
-        // (
-        //     Tbgui::Loaded(State {
-        //         config: cfg,
-        //         ..State::default()
-        //     }),
-        //     Task::perform(load(), Message::Loaded),
-        // )
     }
 
     pub fn title(&self) -> String {
@@ -61,10 +47,14 @@ impl Tbgui {
                     }
                     _ => {}
                 }
-                Task::perform(load(), Message::LoadedRemoteState)
+                Task::done(Message::LoadRemoteState)
             }
             Tbgui::Loaded(state) => {
                 let command = match message {
+                    Message::LoadRemoteState => {
+                        let config = state.config.clone();
+                        Task::perform(async move { load(&config).await }, Message::LoadedRemoteState)
+                    },
                     Message::LoadedRemoteState(result) => match result {
                         Ok(remote_state) => {
                             state.items = remote_state.items;
@@ -126,10 +116,11 @@ impl Tbgui {
                     }
                     Message::DownloadResults => {
                         let client = state.client.clone();
+                        let config = state.config.clone();
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = download_results(&client).await {
+                                    if let Err(e) = download_results(&client, &config).await {
                                         println!("Error downloading results: {:?}", e);
                                     }
                                 }
@@ -139,10 +130,11 @@ impl Tbgui {
                     }
                     Message::DeleteResults => {
                         let client = state.client.clone();
+                        let config = state.config.clone();
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = delete_results(&client).await {
+                                    if let Err(e) = delete_results(&client, &config).await {
                                         println!("Error deleting results: {:?}", e);
                                     }
                                 }
@@ -160,10 +152,13 @@ impl Tbgui {
                     }
                     Message::DownloadDefaultTemplate => {
                         let client = state.client.clone();
+                        let config = state.config.clone();
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = download_default_template(&client).await {
+                                    if let Err(e) =
+                                        download_default_template(&client, &config).await
+                                    {
                                         println!("Error downloading default template: {:?}", e);
                                     }
                                 }

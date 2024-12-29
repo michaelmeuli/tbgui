@@ -1,7 +1,8 @@
 use crate::types::{Item, LoadError, RemoteState};
 use crate::{
-    DEFAULT_TEMPLATE_REMOTE, REMOTE_RAW_DIR, REMOTE_RESULTS_DIR, TB_PROFILER_SCRIPT, USERNAME, USER_TEMPLATE_REMOTE
+    REMOTE_RAW_DIR, TB_PROFILER_SCRIPT, USER_TEMPLATE_REMOTE
 };
+use crate::config::TbguiConfig;
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use russh_sftp::client::fs::ReadDir;
@@ -15,7 +16,7 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
 
-pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
+pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = UserDirs::new()
         .unwrap()
         .home_dir()
@@ -24,7 +25,7 @@ pub async fn create_client() -> Result<Client, async_ssh2_tokio::Error> {
     let auth_method = AuthMethod::with_key_file(key_path, None);
     let client = Client::connect(
         ("130.60.24.133", 22),
-        USERNAME,
+        config.username.as_str(),
         auth_method,
         ServerCheckMethod::NoCheck,
     )
@@ -71,12 +72,12 @@ pub async fn run_tbprofiler(
     Ok(())
 }
 
-pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
-    let remote_dir = REMOTE_RESULTS_DIR;
+    let remote_dir = config.remote_results_dir.as_str();
     let local_dir = UserDirs::new()
         .unwrap()
         .home_dir()
@@ -101,8 +102,8 @@ pub async fn download_results(client: &Client) -> Result<(), async_ssh2_tokio::E
     Ok(())
 }
 
-pub async fn delete_results(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
-    let command = format!("rm {}/*", REMOTE_RESULTS_DIR);
+pub async fn delete_results(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+    let command = format!("rm {}/*", config.remote_results_dir.as_str());
     client.execute(&command).await?;
     let directory = UserDirs::new()
         .unwrap()
@@ -124,8 +125,8 @@ pub async fn delete_results(client: &Client) -> Result<(), async_ssh2_tokio::Err
     Ok(())
 }
 
-pub async fn download_default_template(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
-    let remote_file_path = DEFAULT_TEMPLATE_REMOTE;
+pub async fn download_default_template(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+    let remote_file_path = config.default_template_remote.as_str();
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
@@ -199,9 +200,9 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     tasks
 }
 
-pub async fn load() -> Result<RemoteState, LoadError> {
+pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
     delete_log_file();
-    match create_client().await {
+    match create_client(config).await {
         Ok(client) => {
             println!("Connected to the server");
             let reads = get_raw_reads(&client).await.map_err(|e| LoadError {
