@@ -7,9 +7,6 @@ mod config;
 use iced;
 use tbgui::Tbgui;
 
-const TB_PROFILER_SCRIPT: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh";
-const USER_TEMPLATE_REMOTE: &str = "/shares/sander.imm.uzh/MM/PRJEB57919/template/user_template.docx";
-
 
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();

@@ -1,7 +1,4 @@
 use crate::types::{Item, LoadError, RemoteState};
-use crate::{
-    TB_PROFILER_SCRIPT, USER_TEMPLATE_REMOTE
-};
 use crate::config::TbguiConfig;
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
@@ -61,11 +58,12 @@ pub async fn run_tbprofiler(
     client: &Client,
     items_checked: usize,
     samples: String,
+    config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!(
         "sbatch --array 0-{} {} \"{}\"",
         items_checked - 1,
-        TB_PROFILER_SCRIPT,
+        config.tb_profiler_script.as_str(),
         samples
     );
     println!("Running command: {}", command);
@@ -144,8 +142,8 @@ pub async fn download_default_template(client: &Client, config: &TbguiConfig) ->
     Ok(())
 }
 
-pub async fn upload_user_template(client: &Client) -> Result<(), async_ssh2_tokio::Error> {
-    let remote_file_path = USER_TEMPLATE_REMOTE;
+pub async fn upload_user_template(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+    let remote_file_path = config.user_template_remote.as_str();
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()

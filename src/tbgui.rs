@@ -101,11 +101,12 @@ impl Tbgui {
                             .join(",");
                         println!("Running TB-Profiler for samples: {}", samples);
                         let client = state.client.clone();
+                        let config = state.config.clone();
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
                                     if let Err(e) =
-                                        run_tbprofiler(&client, items_checked, samples).await
+                                        run_tbprofiler(&client, items_checked, samples, &config).await
                                     {
                                         println!("Error running tbprofiler: {:?}", e);
                                     }
@@ -168,10 +169,11 @@ impl Tbgui {
                     }
                     Message::UploadUserTemplate => {
                         let client = state.client.clone();
+                        let config = state.config.clone();
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = upload_user_template(&client).await {
+                                    if let Err(e) = upload_user_template(&client, &config).await {
                                         println!("Error uploading user template: {:?}", e);
                                     }
                                 }
