@@ -72,7 +72,29 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
-        gear_button().on_press(Message::HomePressed),
+        gear_button().on_press(Message::ConfigPressed),
+    ]
+    .spacing(360);
+    let template = column![
+        button("Download default template").on_press(Message::DownloadDefaultTemplate).width(250),
+        button("Upload user template").on_press(Message::UploadUserTemplate).width(250),
+    ]
+    .spacing(20);
+
+    let content = column![title, controls, template].spacing(20).max_width(800);
+
+    scrollable(container(content).center_x(Fill).padding(40)).into()
+}
+
+pub fn view_config<'a>() -> Element<'a, Message> {
+    let title = text("Configuration")
+        .width(Fill)
+        .size(60)
+        .color([0.5, 0.5, 0.5])
+        .align_x(Center);
+    let controls = row![
+        button("Home").on_press(Message::HomePressed).width(80),
+        gear_button().on_press(Message::SettingsPressed),
     ]
     .spacing(360);
     let template = column![

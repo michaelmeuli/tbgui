@@ -186,6 +186,10 @@ impl Tbgui {
                     Message::DeletedResults => Task::none(),
                     Message::DownloadedDefaultTemplate => Task::none(),
                     Message::UploadedUserTemplate => Task::none(),
+                    Message::ConfigPressed => {
+                        state.screen = Screen::Config;
+                        Task::none()
+                    }
                 };
                 command
             }
@@ -204,6 +208,7 @@ impl Tbgui {
             }) => match screen {
                 Screen::Home => view_home(filter, items, error_message),
                 Screen::Settings => view_settings(),
+                Screen::Config => view_config(),
             },
         }
     }

@@ -36,6 +36,7 @@ pub enum Message {
     DeletedResults,
     DownloadedDefaultTemplate,
     UploadedUserTemplate,
+    ConfigPressed,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -43,6 +44,7 @@ pub enum Screen {
     #[default]
     Home,
     Settings,
+    Config,
 }
 
 #[derive(Debug, Clone)]
