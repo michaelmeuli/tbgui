@@ -1,5 +1,8 @@
+use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
-use iced::widget::{button, center, column, container, keyed_column, row, scrollable, svg, text};
+use iced::widget::{
+    button, center, column, container, keyed_column, row, scrollable, svg, text, text_input,
+};
 use iced::{Center, Element, Fill};
 
 pub fn view_home<'a>(
@@ -76,34 +79,51 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     ]
     .spacing(360);
     let template = column![
-        button("Download default template").on_press(Message::DownloadDefaultTemplate).width(250),
-        button("Upload user template").on_press(Message::UploadUserTemplate).width(250),
+        button("Download default template")
+            .on_press(Message::DownloadDefaultTemplate)
+            .width(250),
+        button("Upload user template")
+            .on_press(Message::UploadUserTemplate)
+            .width(250),
     ]
     .spacing(20);
 
-    let content = column![title, controls, template].spacing(20).max_width(800);
+    let content = column![title, controls, template]
+        .spacing(20)
+        .max_width(800);
 
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
-pub fn view_config<'a>() -> Element<'a, Message> {
-    let title = text("Configuration")
+pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
+    let title = text("Settings")
         .width(Fill)
         .size(60)
         .color([0.5, 0.5, 0.5])
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
-        gear_button().on_press(Message::SettingsPressed),
+        gear_button().on_press(Message::ConfigPressed),
     ]
     .spacing(360);
-    let template = column![
-        button("Download default template").on_press(Message::DownloadDefaultTemplate).width(250),
-        button("Upload user template").on_press(Message::UploadUserTemplate).width(250),
-    ]
-    .spacing(20);
 
-    let content = column![title, controls, template].spacing(20).max_width(800);
+    let name_input = text_input("What needs to be done?", &config.username)
+        .on_input(Message::ConfigNameChanged)
+        .on_submit(Message::ConfigNameSubmitted)
+        .padding(15)
+        .size(20)
+        .align_x(Center);
+
+    let rawdir_input = text_input("What needs to be done?", &config.remote_raw_dir)
+        .on_input(Message::ConfigRawDirChanged)
+        .on_submit(Message::ConfigRawDirSubmitted)
+        .padding(15)
+        .size(20)
+        .align_x(Center);
+
+    let content = column![title, controls, name_input, rawdir_input]
+        .spacing(20)
+        .max_width(800);
 
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }

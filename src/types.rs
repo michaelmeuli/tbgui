@@ -13,6 +13,8 @@ pub struct State {
     pub client: Option<Client>,
     pub error_message: Option<String>,
     pub config: TbguiConfig,
+    pub config_name: String,
+    pub config_raw_dir: String,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +39,11 @@ pub enum Message {
     DownloadedDefaultTemplate,
     UploadedUserTemplate,
     ConfigPressed,
+    ConfigNameChanged(String),
+    ConfigNameSubmitted,
+    ConfigRawDirChanged(String),
+    ConfigRawDirSubmitted,
+    //ConfigScriptPathChanged(String),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
