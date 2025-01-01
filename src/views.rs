@@ -1,5 +1,6 @@
 use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
+use iced::alignment::Horizontal::Left;
 use iced::widget::{
     button, center, column, container, keyed_column, row, scrollable, svg, text, text_input,
 };
@@ -107,21 +108,62 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
     ]
     .spacing(360);
 
-    let name_input = text_input("What needs to be done?", &config.username)
+    let name_text = text("Username:").width(Fill).size(16).align_x(Left);
+    let name_input = text_input("username", &config.username)
         .on_input(Message::ConfigNameChanged)
         .on_submit(Message::ConfigNameSubmitted)
-        .padding(15)
-        .size(20)
-        .align_x(Center);
+        .padding(5)
+        .size(16)
+        .align_x(Left);
+    let name = column![name_text, name_input].spacing(10);
 
-    let rawdir_input = text_input("What needs to be done?", &config.remote_raw_dir)
+    let rawdir_text = text("Path to raw dir on remote:").width(Fill).size(16).align_x(Left);
+    let rawdir_input = text_input("Path to raw dir on remote", &config.remote_raw_dir)
         .on_input(Message::ConfigRawDirChanged)
         .on_submit(Message::ConfigRawDirSubmitted)
-        .padding(15)
-        .size(20)
-        .align_x(Center);
+        .padding(5)
+        .size(16)
+        .align_x(Left);
+    let rawdir = column![rawdir_text, rawdir_input].spacing(10);
 
-    let content = column![title, controls, name_input, rawdir_input]
+    let script_text = text("Path to TB Profiler script on remote:").width(Fill).size(16).align_x(Left);
+    let script_input = text_input("Path to TB Profiler script on remote", &config.tb_profiler_script)
+        .on_input(Message::ConfigScriptPathChanged)
+        .on_submit(Message::ConfigScriptPathSubmitted)
+        .padding(5)
+        .size(16)
+        .align_x(Left);
+    let script = column![script_text, script_input].spacing(10);
+
+    let results_text = text("Remote results dir:").width(Fill).size(16).align_x(Left);
+    let results_input = text_input("Remote results dir", &config.remote_results_dir)
+        .on_input(Message::ConfigResultsPathChanged)
+        .on_submit(Message::ConfigResultsPathSubmitted)
+        .padding(5)
+        .size(16)
+        .align_x(Left);
+    let results = column![results_text, results_input].spacing(10);
+
+    let default_template_text = text("Default template remote:").width(Fill).size(16).align_x(Left);
+    let default_template_input = text_input("Default template remote", &config.default_template_remote)
+        .on_input(Message::ConfigDefaultTemplateChanged)
+        .on_submit(Message::ConfigDefaultTemplateSubmitted)
+        .padding(5)
+        .size(16)
+        .align_x(Left);
+    let default_template = column![default_template_text, default_template_input].spacing(10);
+    
+    let user_template_text = text("Default template remote:").width(Fill).size(16).align_x(Left);
+    let user_template_input = text_input("Default template remote", &config.user_template_remote)
+        .on_input(Message::ConfigUserTemplateChanged)
+        .on_submit(Message::ConfigUserTemplateSubmitted)
+        .padding(5)
+        .size(16)
+        .align_x(Left);
+    let user_template = column![user_template_text, user_template_input].spacing(10);
+    //user_template_remote
+
+    let content = column![title, controls, name, rawdir, script, results, default_template, user_template]
         .spacing(20)
         .max_width(800);
 

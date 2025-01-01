@@ -195,30 +195,89 @@ impl Tbgui {
                         state.screen = Screen::Config;
                         Task::none()
                     }
+
                     Message::ConfigNameChanged(username) => {
-                        state.config_name = username;
+                        state.config.username = username;
                         Task::none()
                     }
                     Message::ConfigNameSubmitted => {
                         let config = TbguiConfig {
-                            username: state.config_name.clone(),
+                            username: state.config.username.clone(),
                             ..state.config.clone()
                         };
                         confy::store("tbgui",None, &config).unwrap();
                         Task::none()
                     }
+
                     Message::ConfigRawDirChanged(remote_raw_dir) => {
-                        state.config_raw_dir = remote_raw_dir;
+                        state.config.remote_raw_dir = remote_raw_dir;
                         Task::none()
                     }
                     Message::ConfigRawDirSubmitted => {
                         let config = TbguiConfig {
-                            remote_raw_dir: state.config_raw_dir.clone(),
+                            remote_raw_dir: state.config.remote_raw_dir.clone(),
                             ..state.config.clone()
                         };
                         confy::store("tbgui",None, &config).unwrap();
                         Task::none()
                     }
+
+                    Message::ConfigScriptPathChanged(tb_profiler_script) => {
+                        state.config.tb_profiler_script = tb_profiler_script;
+                        Task::none()
+                    }
+                    Message::ConfigScriptPathSubmitted => {
+                        let config = TbguiConfig {
+                            tb_profiler_script: state.config.tb_profiler_script.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui",None, &config).unwrap();
+                        Task::none()
+                    }
+                    
+                    Message::ConfigResultsPathChanged(remote_results_dir) => {
+                        state.config.remote_results_dir = remote_results_dir;
+                        Task::none()
+                    }
+                    Message::ConfigResultsPathSubmitted => {
+                        let config = TbguiConfig {
+                            remote_results_dir: state.config.remote_results_dir.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui",None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigDefaultTemplateChanged(default_template_remote) => {
+                        state.config.default_template_remote = default_template_remote;
+                        Task::none()
+                    }
+                    Message::ConfigDefaultTemplateSubmitted => {
+                        let config = TbguiConfig {
+                            default_template_remote: state.config.default_template_remote.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui",None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigUserTemplateChanged(user_template_remote) => {
+                        state.config.user_template_remote = user_template_remote;
+                        Task::none()
+                    }
+                    Message::ConfigUserTemplateSubmitted => {
+                        let config = TbguiConfig {
+                            user_template_remote: state.config.user_template_remote.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui",None, &config).unwrap();
+                        Task::none()
+                    }
+
+
+
+                    
+
                 };
                 command
             }
