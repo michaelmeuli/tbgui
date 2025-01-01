@@ -1,5 +1,6 @@
 use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
+use crate::{DEFAULT_TEMPLATE_FILENAME, RESULT_DIR, USER_TEMPLATE_FILENAME};
 use iced::alignment::Horizontal::Left;
 use iced::widget::{
     button, center, column, container, keyed_column, row, scrollable, svg, text, text_input, Space,
@@ -81,9 +82,22 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         gear_button().on_press(Message::ConfigPressed),
     ];
     let template = column![
+        text(format!(
+            "Download default template:\n\"{DEFAULT_TEMPLATE_FILENAME}\" to the directory \"{RESULT_DIR}\"\nin the user's home directory:"
+        ))
+        .width(Fill)
+        .size(16)
+        .align_x(Left),
         button("Download default template")
             .on_press(Message::DownloadDefaultTemplate)
             .width(250),
+        Space::with_height(iced::Length::Fixed(20.0)),
+        text(format!(
+            "Upload user template:\n\"{USER_TEMPLATE_FILENAME}\" in \"{RESULT_DIR}\"\nin the user's home directory to remote:"
+        ))
+        .width(Fill)
+        .size(16)
+        .align_x(Left),
         button("Upload user template")
             .on_press(Message::UploadUserTemplate)
             .width(250),
@@ -91,13 +105,13 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     .spacing(20);
 
     let content = column![
-        title, 
-        controls, 
+        title,
+        controls,
         Space::with_height(iced::Length::Fixed(40.0)),
         template
-        ]
-        .spacing(20)
-        .max_width(800);
+    ]
+    .spacing(20)
+    .max_width(800);
 
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
@@ -110,7 +124,9 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
-        button("Reset to default").on_press(Message::ResetConfig).width(150),
+        button("Reset to default")
+            .on_press(Message::ResetConfig)
+            .width(150),
         Space::with_width(iced::Length::Fill),
         gear_button().on_press(Message::ConfigPressed),
     ]
