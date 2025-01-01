@@ -13,6 +13,7 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
 use std::path::Path;
+use crate::RESULT_DIR;
 
 pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = UserDirs::new()
@@ -81,7 +82,7 @@ pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(
     let local_dir = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results");
+        .join(RESULT_DIR);
     create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
@@ -108,7 +109,7 @@ pub async fn delete_results(client: &Client, config: &TbguiConfig) -> Result<(),
     let directory = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results");
+        .join(RESULT_DIR);
     if !directory.is_dir() {
         println!("Directory does not exist: {:?}", directory);
         return Ok(());
@@ -130,7 +131,7 @@ pub async fn download_default_template(client: &Client, config: &TbguiConfig) ->
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
+        .join(RESULT_DIR)
         .join("default_template.docx");
 
     let channel = client.get_channel().await?;
@@ -148,7 +149,7 @@ pub async fn upload_user_template(client: &Client, config: &TbguiConfig) -> Resu
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
+        .join(RESULT_DIR)
         .join("user_template.docx");
 
     let channel = client.get_channel().await?;
@@ -231,7 +232,7 @@ pub fn log_error(message: &str) {
     let error_file = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
+        .join(RESULT_DIR)
         .join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
@@ -246,7 +247,7 @@ pub fn delete_log_file() {
     let error_file = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
+        .join(RESULT_DIR)
         .join("error.log");
     println!("Attempting to delete: {:?}", error_file);
     if fs::remove_file(&error_file).is_ok() {

@@ -8,6 +8,8 @@ use iced;
 use tbgui::Tbgui;
 
 
+const RESULT_DIR: &str = "tb-profiler-results";
+
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();
 
