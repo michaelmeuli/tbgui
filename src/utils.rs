@@ -82,7 +82,7 @@ pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(
         .unwrap()
         .home_dir()
         .join("tb-profiler-results");
-    tokio::fs::create_dir_all(local_dir.clone()).await?;
+    create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
     for entry in entries {
