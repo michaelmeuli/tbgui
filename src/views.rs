@@ -2,7 +2,7 @@ use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
 use iced::alignment::Horizontal::Left;
 use iced::widget::{
-    button, center, column, container, keyed_column, row, scrollable, svg, text, text_input,
+    button, center, column, container, keyed_column, row, scrollable, svg, text, text_input, Space,
 };
 use iced::{Center, Element, Fill};
 
@@ -21,6 +21,7 @@ pub fn view_home<'a>(
         button("Run Profiler").on_press(Message::RunTbProfiler),
         button("Download Results").on_press(Message::DownloadResults),
         button("Delete Results").on_press(Message::DeleteResults),
+        Space::with_width(iced::Length::Fill),
         gear_button().on_press(Message::SettingsPressed),
     ]
     .spacing(20);
@@ -76,9 +77,9 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
+        Space::with_width(iced::Length::Fill),
         gear_button().on_press(Message::ConfigPressed),
-    ]
-    .spacing(360);
+    ];
     let template = column![
         button("Download default template")
             .on_press(Message::DownloadDefaultTemplate)
@@ -89,7 +90,12 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     ]
     .spacing(20);
 
-    let content = column![title, controls, template]
+    let content = column![
+        title, 
+        controls, 
+        Space::with_height(iced::Length::Fixed(40.0)),
+        template
+        ]
         .spacing(20)
         .max_width(800);
 
@@ -104,9 +110,9 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
+        Space::with_width(iced::Length::Fill),
         gear_button().on_press(Message::ConfigPressed),
-    ]
-    .spacing(360);
+    ];
 
     let name_text = text("Username:").width(Fill).size(16).align_x(Left);
     let name_input = text_input("username", &config.username)
@@ -117,7 +123,10 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
         .align_x(Left);
     let name = column![name_text, name_input].spacing(10);
 
-    let rawdir_text = text("Path to raw dir on remote:").width(Fill).size(16).align_x(Left);
+    let rawdir_text = text("Path to raw dir on remote:")
+        .width(Fill)
+        .size(16)
+        .align_x(Left);
     let rawdir_input = text_input("Path to raw dir on remote", &config.remote_raw_dir)
         .on_input(Message::ConfigRawDirChanged)
         .on_submit(Message::ConfigRawDirSubmitted)
@@ -126,16 +135,25 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
         .align_x(Left);
     let rawdir = column![rawdir_text, rawdir_input].spacing(10);
 
-    let script_text = text("Path to TB Profiler script on remote:").width(Fill).size(16).align_x(Left);
-    let script_input = text_input("Path to TB Profiler script on remote", &config.tb_profiler_script)
-        .on_input(Message::ConfigScriptPathChanged)
-        .on_submit(Message::ConfigScriptPathSubmitted)
-        .padding(5)
+    let script_text = text("Path to TB Profiler script on remote:")
+        .width(Fill)
         .size(16)
         .align_x(Left);
+    let script_input = text_input(
+        "Path to TB Profiler script on remote",
+        &config.tb_profiler_script,
+    )
+    .on_input(Message::ConfigScriptPathChanged)
+    .on_submit(Message::ConfigScriptPathSubmitted)
+    .padding(5)
+    .size(16)
+    .align_x(Left);
     let script = column![script_text, script_input].spacing(10);
 
-    let results_text = text("Remote results dir:").width(Fill).size(16).align_x(Left);
+    let results_text = text("Remote results dir:")
+        .width(Fill)
+        .size(16)
+        .align_x(Left);
     let results_input = text_input("Remote results dir", &config.remote_results_dir)
         .on_input(Message::ConfigResultsPathChanged)
         .on_submit(Message::ConfigResultsPathSubmitted)
@@ -144,16 +162,23 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
         .align_x(Left);
     let results = column![results_text, results_input].spacing(10);
 
-    let default_template_text = text("Default template remote:").width(Fill).size(16).align_x(Left);
-    let default_template_input = text_input("Default template remote", &config.default_template_remote)
-        .on_input(Message::ConfigDefaultTemplateChanged)
-        .on_submit(Message::ConfigDefaultTemplateSubmitted)
-        .padding(5)
+    let default_template_text = text("Default template remote:")
+        .width(Fill)
         .size(16)
         .align_x(Left);
+    let default_template_input =
+        text_input("Default template remote", &config.default_template_remote)
+            .on_input(Message::ConfigDefaultTemplateChanged)
+            .on_submit(Message::ConfigDefaultTemplateSubmitted)
+            .padding(5)
+            .size(16)
+            .align_x(Left);
     let default_template = column![default_template_text, default_template_input].spacing(10);
-    
-    let user_template_text = text("Default template remote:").width(Fill).size(16).align_x(Left);
+
+    let user_template_text = text("Default template remote:")
+        .width(Fill)
+        .size(16)
+        .align_x(Left);
     let user_template_input = text_input("Default template remote", &config.user_template_remote)
         .on_input(Message::ConfigUserTemplateChanged)
         .on_submit(Message::ConfigUserTemplateSubmitted)
@@ -163,9 +188,18 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
     let user_template = column![user_template_text, user_template_input].spacing(10);
     //user_template_remote
 
-    let content = column![title, controls, name, rawdir, script, results, default_template, user_template]
-        .spacing(20)
-        .max_width(800);
+    let content = column![
+        title,
+        controls,
+        name,
+        rawdir,
+        script,
+        results,
+        default_template,
+        user_template
+    ]
+    .spacing(20)
+    .max_width(800);
 
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
