@@ -8,10 +8,11 @@ use std::collections::HashSet;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use tokio::fs::File;
+use tokio::fs::{File, create_dir_all};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
+use std::path::Path;
 
 pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = UserDirs::new()
@@ -167,6 +168,9 @@ pub async fn download_file(
     let mut remote_file = sftp
         .open_with_flags(remote_file_path, OpenFlags::READ)
         .await?;
+    if let Some(parent) = Path::new(local_file_path).parent() {
+        create_dir_all(parent).await?;
+    }
     let mut local_file = File::create(local_file_path.clone()).await?;
     let mut buffer = [0u8; 4096];
 
