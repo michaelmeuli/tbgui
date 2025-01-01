@@ -49,6 +49,7 @@ pub enum Message {
     ConfigDefaultTemplateSubmitted,
     ConfigUserTemplateChanged(String),
     ConfigUserTemplateSubmitted,
+    ResetConfig,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

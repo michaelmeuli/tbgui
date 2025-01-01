@@ -205,7 +205,7 @@ impl Tbgui {
                             username: state.config.username.clone(),
                             ..state.config.clone()
                         };
-                        confy::store("tbgui",None, &config).unwrap();
+                        confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
 
@@ -218,7 +218,7 @@ impl Tbgui {
                             remote_raw_dir: state.config.remote_raw_dir.clone(),
                             ..state.config.clone()
                         };
-                        confy::store("tbgui",None, &config).unwrap();
+                        confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
 
@@ -231,10 +231,10 @@ impl Tbgui {
                             tb_profiler_script: state.config.tb_profiler_script.clone(),
                             ..state.config.clone()
                         };
-                        confy::store("tbgui",None, &config).unwrap();
+                        confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-                    
+
                     Message::ConfigResultsPathChanged(remote_results_dir) => {
                         state.config.remote_results_dir = remote_results_dir;
                         Task::none()
@@ -244,7 +244,7 @@ impl Tbgui {
                             remote_results_dir: state.config.remote_results_dir.clone(),
                             ..state.config.clone()
                         };
-                        confy::store("tbgui",None, &config).unwrap();
+                        confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
 
@@ -257,7 +257,7 @@ impl Tbgui {
                             default_template_remote: state.config.default_template_remote.clone(),
                             ..state.config.clone()
                         };
-                        confy::store("tbgui",None, &config).unwrap();
+                        confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
 
@@ -270,14 +270,15 @@ impl Tbgui {
                             user_template_remote: state.config.user_template_remote.clone(),
                             ..state.config.clone()
                         };
-                        confy::store("tbgui",None, &config).unwrap();
+                        confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-
-
-
-                    
-
+                    Message::ResetConfig => {
+                        let config = TbguiConfig::default();
+                        confy::store("tbgui", None, &config).unwrap();
+                        state.config = config;
+                        Task::none()
+                    }
                 };
                 command
             }

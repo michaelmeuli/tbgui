@@ -110,9 +110,11 @@ pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
+        button("Reset to default").on_press(Message::ResetConfig).width(150),
         Space::with_width(iced::Length::Fill),
         gear_button().on_press(Message::ConfigPressed),
-    ];
+    ]
+    .spacing(20);
 
     let name_text = text("Username:").width(Fill).size(16).align_x(Left);
     let name_input = text_input("username", &config.username)
