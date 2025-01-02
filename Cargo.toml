@@ -2,6 +2,9 @@
 name = "tbgui"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A simple GUI front-end for TB-Profiler using SSH written in Rust"
+repository = "https://github.com/michaelmeuli/tbgui"
 
 [dependencies]
 async-ssh2-tokio = "0.8.12"
