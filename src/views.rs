@@ -46,16 +46,14 @@ pub fn view_home<'a>(
         )
         .spacing(10)
         .into()
+    } else if let Some(error) = error_message {
+        empty_message(error)
     } else {
-        if let Some(error) = error_message {
-            empty_message(error)
-        } else {
-            empty_message(match filter {
-                Filter::All => "No raw read sequences found...",
-                Filter::Unchecked => "All raw read sequences selected...",
-                Filter::Checked => "No raw read sequences selected...",
-            })
-        }
+        empty_message(match filter {
+            Filter::All => "No raw read sequences found...",
+            Filter::Unchecked => "All raw read sequences selected...",
+            Filter::Checked => "No raw read sequences selected...",
+        })
     };
 
     scrollable(
