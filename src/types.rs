@@ -36,6 +36,20 @@ pub enum Message {
     DeletedResults,
     DownloadedDefaultTemplate,
     UploadedUserTemplate,
+    ConfigPressed,
+    ConfigNameChanged(String),
+    ConfigNameSubmitted,
+    ConfigRawDirChanged(String),
+    ConfigRawDirSubmitted,
+    ConfigScriptPathChanged(String),
+    ConfigScriptPathSubmitted,
+    ConfigResultsPathChanged(String),
+    ConfigResultsPathSubmitted,
+    ConfigDefaultTemplateChanged(String),
+    ConfigDefaultTemplateSubmitted,
+    ConfigUserTemplateChanged(String),
+    ConfigUserTemplateSubmitted,
+    ResetConfig,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -43,6 +57,7 @@ pub enum Screen {
     #[default]
     Home,
     Settings,
+    Config,
 }
 
 #[derive(Debug, Clone)]

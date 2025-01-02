@@ -2,6 +2,7 @@ use crate::types::LoadError;
 use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
+use crate::config::TbguiConfig;
 use iced::futures::TryFutureExt;
 use iced::keyboard;
 use iced::widget;
@@ -53,8 +54,11 @@ impl Tbgui {
                 let command = match message {
                     Message::LoadRemoteState => {
                         let config = state.config.clone();
-                        Task::perform(async move { load(&config).await }, Message::LoadedRemoteState)
-                    },
+                        Task::perform(
+                            async move { load(&config).await },
+                            Message::LoadedRemoteState,
+                        )
+                    }
                     Message::LoadedRemoteState(result) => match result {
                         Ok(remote_state) => {
                             state.items = remote_state.items;
@@ -106,7 +110,8 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     if let Err(e) =
-                                        run_tbprofiler(&client, items_checked, samples, &config).await
+                                        run_tbprofiler(&client, items_checked, samples, &config)
+                                            .await
                                     {
                                         println!("Error running tbprofiler: {:?}", e);
                                     }
@@ -186,6 +191,94 @@ impl Tbgui {
                     Message::DeletedResults => Task::none(),
                     Message::DownloadedDefaultTemplate => Task::none(),
                     Message::UploadedUserTemplate => Task::none(),
+                    Message::ConfigPressed => {
+                        state.screen = Screen::Config;
+                        Task::none()
+                    }
+
+                    Message::ConfigNameChanged(username) => {
+                        state.config.username = username;
+                        Task::none()
+                    }
+                    Message::ConfigNameSubmitted => {
+                        let config = TbguiConfig {
+                            username: state.config.username.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui", None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigRawDirChanged(remote_raw_dir) => {
+                        state.config.remote_raw_dir = remote_raw_dir;
+                        Task::none()
+                    }
+                    Message::ConfigRawDirSubmitted => {
+                        let config = TbguiConfig {
+                            remote_raw_dir: state.config.remote_raw_dir.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui", None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigScriptPathChanged(tb_profiler_script) => {
+                        state.config.tb_profiler_script = tb_profiler_script;
+                        Task::none()
+                    }
+                    Message::ConfigScriptPathSubmitted => {
+                        let config = TbguiConfig {
+                            tb_profiler_script: state.config.tb_profiler_script.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui", None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigResultsPathChanged(remote_results_dir) => {
+                        state.config.remote_results_dir = remote_results_dir;
+                        Task::none()
+                    }
+                    Message::ConfigResultsPathSubmitted => {
+                        let config = TbguiConfig {
+                            remote_results_dir: state.config.remote_results_dir.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui", None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigDefaultTemplateChanged(default_template_remote) => {
+                        state.config.default_template_remote = default_template_remote;
+                        Task::none()
+                    }
+                    Message::ConfigDefaultTemplateSubmitted => {
+                        let config = TbguiConfig {
+                            default_template_remote: state.config.default_template_remote.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui", None, &config).unwrap();
+                        Task::none()
+                    }
+
+                    Message::ConfigUserTemplateChanged(user_template_remote) => {
+                        state.config.user_template_remote = user_template_remote;
+                        Task::none()
+                    }
+                    Message::ConfigUserTemplateSubmitted => {
+                        let config = TbguiConfig {
+                            user_template_remote: state.config.user_template_remote.clone(),
+                            ..state.config.clone()
+                        };
+                        confy::store("tbgui", None, &config).unwrap();
+                        Task::none()
+                    }
+                    Message::ResetConfig => {
+                        let config = TbguiConfig::default();
+                        confy::store("tbgui", None, &config).unwrap();
+                        state.config = config;
+                        Task::none()
+                    }
                 };
                 command
             }
@@ -200,10 +293,12 @@ impl Tbgui {
                 filter,
                 items,
                 error_message,
+                config,
                 ..
             }) => match screen {
                 Screen::Home => view_home(filter, items, error_message),
                 Screen::Settings => view_settings(),
+                Screen::Config => view_config(config),
             },
         }
     }

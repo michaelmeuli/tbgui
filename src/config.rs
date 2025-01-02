@@ -22,7 +22,3 @@ impl ::std::default::Default for TbguiConfig {
         }
     }
 }
-
-
-//const USER_TEMPLATE_REMOTE_DIR: &str = "/home/mimeul/shares/MM/PRJEB57919/template";
-

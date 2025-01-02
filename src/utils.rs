@@ -1,5 +1,6 @@
-use crate::types::{Item, LoadError, RemoteState};
 use crate::config::TbguiConfig;
+use crate::types::{Item, LoadError, RemoteState};
+use crate::{DEFAULT_TEMPLATE_FILENAME, RESULT_DIR, USER_TEMPLATE_FILENAME};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use russh_sftp::client::fs::ReadDir;
@@ -7,8 +8,9 @@ use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
+use std::path::Path;
 use std::path::PathBuf;
-use tokio::fs::File;
+use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
@@ -30,7 +32,10 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_to
     Ok(client)
 }
 
-pub async fn get_raw_reads(client: &Client, config: &TbguiConfig) -> Result<Vec<String>, async_ssh2_tokio::Error> {
+pub async fn get_raw_reads(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<Vec<String>, async_ssh2_tokio::Error> {
     let remote_raw_dir: &str = config.remote_raw_dir.as_str();
     let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
     let result = client.execute(&command).await?;
@@ -71,17 +76,17 @@ pub async fn run_tbprofiler(
     Ok(())
 }
 
-pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn download_results(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<(), async_ssh2_tokio::Error> {
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     let remote_dir = config.remote_results_dir.as_str();
-    let local_dir = UserDirs::new()
-        .unwrap()
-        .home_dir()
-        .join("tb-profiler-results");
-    tokio::fs::create_dir_all(local_dir.clone()).await?;
+    let local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR);
+    create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
     for entry in entries {
@@ -101,13 +106,13 @@ pub async fn download_results(client: &Client, config: &TbguiConfig) -> Result<(
     Ok(())
 }
 
-pub async fn delete_results(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn delete_results(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!("rm {}/*", config.remote_results_dir.as_str());
     client.execute(&command).await?;
-    let directory = UserDirs::new()
-        .unwrap()
-        .home_dir()
-        .join("tb-profiler-results");
+    let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR);
     if !directory.is_dir() {
         println!("Directory does not exist: {:?}", directory);
         return Ok(());
@@ -124,13 +129,16 @@ pub async fn delete_results(client: &Client, config: &TbguiConfig) -> Result<(),
     Ok(())
 }
 
-pub async fn download_default_template(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn download_default_template(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<(), async_ssh2_tokio::Error> {
     let remote_file_path = config.default_template_remote.as_str();
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
-        .join("default_template.docx");
+        .join(RESULT_DIR)
+        .join(DEFAULT_TEMPLATE_FILENAME);
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
@@ -142,13 +150,16 @@ pub async fn download_default_template(client: &Client, config: &TbguiConfig) ->
     Ok(())
 }
 
-pub async fn upload_user_template(client: &Client, config: &TbguiConfig) -> Result<(), async_ssh2_tokio::Error> {
+pub async fn upload_user_template(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<(), async_ssh2_tokio::Error> {
     let remote_file_path = config.user_template_remote.as_str();
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
-        .join("user_template.docx");
+        .join(RESULT_DIR)
+        .join(USER_TEMPLATE_FILENAME);
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
@@ -167,6 +178,9 @@ pub async fn download_file(
     let mut remote_file = sftp
         .open_with_flags(remote_file_path, OpenFlags::READ)
         .await?;
+    if let Some(parent) = Path::new(local_file_path).parent() {
+        create_dir_all(parent).await?;
+    }
     let mut local_file = File::create(local_file_path.clone()).await?;
     let mut buffer = [0u8; 4096];
 
@@ -204,9 +218,11 @@ pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
     match create_client(config).await {
         Ok(client) => {
             println!("Connected to the server");
-            let reads = get_raw_reads(&client, config).await.map_err(|e| LoadError {
-                error: e.to_string(),
-            })?;
+            let reads = get_raw_reads(&client, config)
+                .await
+                .map_err(|e| LoadError {
+                    error: e.to_string(),
+                })?;
 
             let tasks = create_tasks(reads);
             Ok(RemoteState {
@@ -227,7 +243,7 @@ pub fn log_error(message: &str) {
     let error_file = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
+        .join(RESULT_DIR)
         .join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
@@ -242,7 +258,7 @@ pub fn delete_log_file() {
     let error_file = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join("tb-profiler-results")
+        .join(RESULT_DIR)
         .join("error.log");
     println!("Attempting to delete: {:?}", error_file);
     if fs::remove_file(&error_file).is_ok() {
