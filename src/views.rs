@@ -40,7 +40,7 @@ pub fn view_home<'a>(
                     (
                         item.id,
                         item.view()
-                            .map(move |message| Message::ItemMessage(i, message)),
+                            .map(move |message| Message::Item(i, message)),
                     )
                 }),
         )
@@ -114,7 +114,7 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
-pub fn view_config<'a>(config: &'a TbguiConfig) -> Element<'a, Message> {
+pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
     let title = text("Settings")
         .width(Fill)
         .size(60)

@@ -21,7 +21,7 @@ pub enum Message {
     LoadRemoteState,
     LoadedRemoteState(Result<RemoteState, LoadError>),
     FilterChanged(Filter),
-    ItemMessage(usize, ItemMessage),
+    Item(usize, ItemMessage),
     TabPressed { shift: bool },
     ToggleFullscreen(window::Mode),
     RunTbProfiler,

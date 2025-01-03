@@ -97,7 +97,7 @@ pub async fn download_results(
         let remote_file_path = format!("{}/{}", remote_dir, file_name);
         let local_file_path = local_dir.join(&file_name).clone();
 
-        if file_type.is_file() && (&file_name).ends_with(".docx") {
+        if file_type.is_file() && (file_name).ends_with(".docx") {
             if let Err(e) = download_file(&sftp, &remote_file_path, &local_file_path).await {
                 println!("Error downloading file: {:?}", e);
             }
@@ -144,7 +144,7 @@ pub async fn download_default_template(
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
-    if let Err(e) = download_file(&sftp, &remote_file_path, &local_file_path).await {
+    if let Err(e) = download_file(&sftp, remote_file_path, &local_file_path).await {
         println!("Error downloading file: {:?}", e);
     }
     Ok(())
@@ -247,7 +247,6 @@ pub fn log_error(message: &str) {
         .join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
-        .write(true)
         .append(true)
         .open(error_file)
         .expect("Failed to open log file");

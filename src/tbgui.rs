@@ -75,7 +75,7 @@ impl Tbgui {
 
                         Task::none()
                     }
-                    Message::ItemMessage(i, item_message) => {
+                    Message::Item(i, item_message) => {
                         if let Some(item) = state.items.get_mut(i) {
                             item.update(item_message);
                             Task::none()

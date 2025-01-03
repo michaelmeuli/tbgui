@@ -4,7 +4,6 @@ mod views;
 mod types;
 mod config;
 
-use iced;
 use tbgui::Tbgui;
 
 
