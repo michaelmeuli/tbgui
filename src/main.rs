@@ -6,7 +6,6 @@ mod config;
 
 use tbgui::Tbgui;
 
-
 const RESULT_DIR: &str = "tb-profiler-results";
 const DEFAULT_TEMPLATE_FILENAME: &str = "default_template.docx";
 const USER_TEMPLATE_FILENAME: &str = "user_template.docx";
