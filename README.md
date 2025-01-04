@@ -8,13 +8,13 @@ The scripts executed on the remote cluster can be found here: [tbgui-server-scri
 
 ## cargo doc
 
-[https://michaelmeuli.github.io/tbgui/tbgui/index.html](https://michaelmeuli.github.io/tbgui/tbgui/index.html)<br><br>
+[https://michaelmeuli.github.io/tbgui/tbgui/](https://michaelmeuli.github.io/tbgui/tbgui/index.html)<br><br>
 
 
 ### Built with:
 - [iced](https://iced.rs/): A cross-platform GUI library for Rust focused on simplicity and type-safety.
-- [async_ssh2_tokio]: (https://docs.rs/async-ssh2-tokio/latest/async_ssh2_tokio/): This library is an asynchronous and easy-to-use high level ssh client library for rust with the tokio runtime.
+- [async_ssh2_tokio](https://docs.rs/async-ssh2-tokio/latest/async_ssh2_tokio/): This library is an asynchronous and easy-to-use high level ssh client library for rust with the tokio runtime.
 <br>Powered by the rust ssh implementation [russh](https://docs.rs/russh/latest/russh/).
 
 ### Starting point:
-[Iced Todos Showcase] https://github.com/iced-rs/iced/tree/master/examples/todos
+[Iced Todos Showcase](https://github.com/iced-rs/iced/tree/master/examples/todos)
