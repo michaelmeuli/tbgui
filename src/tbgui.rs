@@ -140,14 +140,18 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = delete_results(&client, &config).await {
+                                    delete_results(&client, &config).await.map_err(|e| {
                                         println!("Error returned from delete_results(): {:?}", e);
-                                    }
+                                        format!("{:?}", e)
+                                    })
+                                } else {
+                                    Err("Client is None".to_string())
                                 }
                             },
-                            |_| Message::DeletedResults,
+                            |result| Message::DeletedResults(result.unwrap_err()),
                         )
                     }
+                    
                     Message::SettingsPressed => {
                         state.screen = Screen::Settings;
                         Task::none()
@@ -188,7 +192,10 @@ impl Tbgui {
                     }
                     Message::ProfilerRunCompleted => Task::none(),
                     Message::DownloadedResults => Task::none(),
-                    Message::DeletedResults => Task::none(),
+                    Message::DeletedResults(result) => {
+                        state.error_message = Some(result);
+                        Task::none()
+                    },
                     Message::DownloadedDefaultTemplate => Task::none(),
                     Message::UploadedUserTemplate => Task::none(),
                     Message::ConfigPressed => {
