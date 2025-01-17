@@ -106,14 +106,24 @@ pub async fn download_results(
     Ok(())
 }
 
-pub async fn delete_results(
+pub async fn delete_results (
     client: &Client,
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
-    let command = format!("rm {}/*", config.remote_results_dir.as_str());
-    println!("Running command: {}", command);
-    let commandexecutedresult = client.execute(&command).await?;
-    println!("Command executed: {:?}", commandexecutedresult);
+    let command_checkdir = format!("ls {}/", config.remote_results_dir.as_str());
+    println!("Running command_checkdir: {:?}", command_checkdir);
+    let commandexecutedresult_checkdir = client.execute(&command_checkdir).await?;
+    println!("command_checkdir executed: {:?}", commandexecutedresult_checkdir);
+    if commandexecutedresult_checkdir.exit_status != 0 {
+        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("No such directory: {:?}", config.remote_results_dir),
+        )));
+    }
+    let command_rm = format!("rm {}/*", config.remote_results_dir.as_str());
+    println!("Running command_rm: {}", command_rm);
+    let commandexecutedresult_rm = client.execute(&command_rm).await?;
+    println!("command_rm executed: {:?}", commandexecutedresult_rm);
     let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR);
     if !directory.is_dir() {
         println!("Directory does not exist: {:?}", directory);

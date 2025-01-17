@@ -30,7 +30,9 @@ pub fn view_home<'a>(
     let controls = view_controls(items, *filter);
     let filtered_items = items.iter().filter(|item| filter.matches(item));
 
-    let items: Element<_> = if filtered_items.count() > 0 {
+    let items: Element<_> = if let Some(error) = error_message {
+        empty_message(error)
+    } else if filtered_items.count() > 0 {
         keyed_column(
             items
                 .iter()
@@ -39,15 +41,12 @@ pub fn view_home<'a>(
                 .map(|(i, item)| {
                     (
                         item.id,
-                        item.view()
-                            .map(move |message| Message::Item(i, message)),
+                        item.view().map(move |message| Message::Item(i, message)),
                     )
                 }),
         )
         .spacing(10)
         .into()
-    } else if let Some(error) = error_message {
-        empty_message(error)
     } else {
         empty_message(match filter {
             Filter::All => "No raw read sequences found...",

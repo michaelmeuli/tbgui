@@ -141,7 +141,7 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     if let Err(e) = delete_results(&client, &config).await {
-                                        println!("Error deleting results: {:?}", e);
+                                        println!("Error returned from delete_results(): {:?}", e);
                                     }
                                 }
                             },
