@@ -148,7 +148,7 @@ impl Tbgui {
                                     Err("Client is None".to_string())
                                 }
                             },
-                            |result| Message::DeletedResults(result.unwrap_err()),
+                            |result| Message::DeletedResults(result),
                         )
                     }
                     
@@ -193,7 +193,14 @@ impl Tbgui {
                     Message::ProfilerRunCompleted => Task::none(),
                     Message::DownloadedResults => Task::none(),
                     Message::DeletedResults(result) => {
-                        state.error_message = Some(result);
+                        match result {
+                            Ok(_) => {
+                                state.error_message = None;
+                            }
+                            Err(result) => {
+                                state.error_message = Some(result);
+                            }
+                        }
                         Task::none()
                     },
                     Message::DownloadedDefaultTemplate => Task::none(),

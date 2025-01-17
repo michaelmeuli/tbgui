@@ -33,7 +33,7 @@ pub enum Message {
     DownloadDefaultTemplate,
     UploadUserTemplate,
     DownloadedResults,
-    DeletedResults(String),
+    DeletedResults(Result<(), String>),
     DownloadedDefaultTemplate,
     UploadedUserTemplate,
     ConfigPressed,
