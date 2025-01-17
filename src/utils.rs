@@ -111,7 +111,9 @@ pub async fn delete_results(
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!("rm {}/*", config.remote_results_dir.as_str());
-    client.execute(&command).await?;
+    println!("Running command: {}", command);
+    let commandexecutedresult = client.execute(&command).await?;
+    println!("Command executed: {:?}", commandexecutedresult);
     let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR);
     if !directory.is_dir() {
         println!("Directory does not exist: {:?}", directory);
