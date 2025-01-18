@@ -369,7 +369,7 @@ impl Tbgui {
             }
         });
         let periodic_subscription =
-            time::every(Duration::from_secs(2 * 60)).map(|_| Message::CheckIfRunning);
+            time::every(Duration::from_secs(1 * 60)).map(|_| Message::CheckIfRunning);
         Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
 }
