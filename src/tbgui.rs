@@ -1,13 +1,14 @@
+use crate::config::TbguiConfig;
 use crate::types::LoadError;
 use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
-use crate::config::TbguiConfig;
 use iced::futures::TryFutureExt;
-use iced::keyboard;
 use iced::widget;
 use iced::window;
+use iced::{keyboard, time};
 use iced::{Element, Subscription, Task};
+use std::time::Duration;
 
 #[derive(Debug)]
 pub enum Tbgui {
@@ -151,7 +152,7 @@ impl Tbgui {
                             |result| Message::DeletedResults(result),
                         )
                     }
-                    
+
                     Message::SettingsPressed => {
                         state.screen = Screen::Settings;
                         Task::none()
@@ -202,7 +203,7 @@ impl Tbgui {
                             }
                         }
                         Task::none()
-                    },
+                    }
                     Message::DownloadedDefaultTemplate => Task::none(),
                     Message::UploadedUserTemplate => Task::none(),
                     Message::ConfigPressed => {
@@ -293,6 +294,35 @@ impl Tbgui {
                         state.config = config;
                         Task::none()
                     }
+                    Message::CheckIfRunning => {
+                        let client = state.client.clone();
+                        let config = state.config.clone();
+
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    check_if_running(&client, &config).await
+                                } else {
+                                    Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+                                        std::io::ErrorKind::Other,
+                                        "check_if_running(): Client is None",
+                                    )))
+                                }
+                            },
+                            |result| match result {
+                                Ok(is_running) => Message::CheckIfRunningCompleted(is_running),
+                                Err(e) => {
+                                    println!("Error check_if_running(): {:?}", e);
+                                    Message::CheckIfRunningCompleted(false)
+                                }
+                            },
+                        )
+                    }
+
+                    Message::CheckIfRunningCompleted(is_running) => {
+                        state.is_running = is_running;
+                        Task::none()
+                    },
                 };
                 command
             }
@@ -338,7 +368,8 @@ impl Tbgui {
                 _ => None,
             }
         });
-        let periodic_subscription = time::every(Duration::from_secs(2 * 60)).map(|_| Message::CheckIfRunning);
+        let periodic_subscription =
+            time::every(Duration::from_secs(2 * 60)).map(|_| Message::CheckIfRunning);
         Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
 }

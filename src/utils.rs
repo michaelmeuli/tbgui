@@ -220,15 +220,19 @@ pub async fn download_file(
 pub async fn check_if_running(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<(), async_ssh2_tokio::Error> {
+) -> Result<bool, async_ssh2_tokio::Error> {
     let command_check_running = format!("squeue -u {}", config.username.as_str());
     println!("Running command_check_running: {:?}", command_check_running);
     let commandexecutedresult_check_if_running = client.execute(&command_check_running).await?;
+    let running = commandexecutedresult_check_if_running
+        .stdout
+        .contains(config.username.as_str());
     println!(
         "command_check_running executed: {:?}",
         commandexecutedresult_check_if_running
     );
-    Ok(())
+    println!("Is running: {:?}", running);
+    Ok(running)
 }
 
 pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {

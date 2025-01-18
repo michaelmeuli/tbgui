@@ -13,6 +13,7 @@ pub struct State {
     pub client: Option<Client>,
     pub error_message: Option<String>,
     pub config: TbguiConfig,
+    pub is_running: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -50,6 +51,8 @@ pub enum Message {
     ConfigUserTemplateChanged(String),
     ConfigUserTemplateSubmitted,
     ResetConfig,
+    CheckIfRunning,
+    CheckIfRunningCompleted(bool),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
