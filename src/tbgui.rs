@@ -320,8 +320,7 @@ impl Tbgui {
     pub fn subscription(&self) -> Subscription<Message> {
         use keyboard::key;
 
-        //let keyboard_subscription = keyboard::on_key_press(|key, modifiers| {
-        keyboard::on_key_press(|key, modifiers| {
+        let keyboard_subscription = keyboard::on_key_press(|key, modifiers| {
             let keyboard::Key::Named(key) = key else {
                 return None;
             };
@@ -338,8 +337,8 @@ impl Tbgui {
                 }
                 _ => None,
             }
-        })
-        //let periodic_subscription = time::every(Duration::from_secs(9 * 60)).map(|_| Message::DownloadResults);
-        //Subscription::batch(vec![keyboard_subscription, periodic_subscription])
+        });
+        let periodic_subscription = time::every(Duration::from_secs(2 * 60)).map(|_| Message::CheckIfRunning);
+        Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
 }
