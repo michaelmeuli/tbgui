@@ -71,9 +71,15 @@ pub async fn run_tbprofiler(
         config.tb_profiler_script.as_str(),
         samples
     );
-    println!("Running command_run_tbprofiler: {:?}", command_run_tbprofiler);
+    println!(
+        "Running command_run_tbprofiler: {:?}",
+        command_run_tbprofiler
+    );
     let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
-    println!("command_checkdir executed: {:?}", commandexecutedresult_run_tbprofiler);
+    println!(
+        "command_checkdir executed: {:?}",
+        commandexecutedresult_run_tbprofiler
+    );
     Ok(())
 }
 
@@ -107,14 +113,17 @@ pub async fn download_results(
     Ok(())
 }
 
-pub async fn delete_results (
+pub async fn delete_results(
     client: &Client,
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
     let command_checkdir = format!("ls {}/", config.remote_results_dir.as_str());
     println!("Running command_checkdir: {:?}", command_checkdir);
     let commandexecutedresult_checkdir = client.execute(&command_checkdir).await?;
-    println!("command_checkdir executed: {:?}", commandexecutedresult_checkdir);
+    println!(
+        "command_checkdir executed: {:?}",
+        commandexecutedresult_checkdir
+    );
     if commandexecutedresult_checkdir.exit_status != 0 {
         return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
             std::io::ErrorKind::NotFound,
@@ -205,6 +214,20 @@ pub async fn download_file(
         local_file.write_all(&buffer[..n]).await?;
     }
     println!("File downloaded successfully to {:?}", local_file_path);
+    Ok(())
+}
+
+pub async fn check_if_running(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<(), async_ssh2_tokio::Error> {
+    let command_check_running = format!("squeue -u {}", config.username.as_str());
+    println!("Running command_check_running: {:?}", command_check_running);
+    let commandexecutedresult_check_if_running = client.execute(&command_check_running).await?;
+    println!(
+        "command_check_running executed: {:?}",
+        commandexecutedresult_check_if_running
+    );
     Ok(())
 }
 
