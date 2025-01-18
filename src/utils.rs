@@ -1,6 +1,6 @@
 use crate::config::TbguiConfig;
 use crate::types::{Item, LoadError, RemoteState};
-use crate::{DEFAULT_TEMPLATE_FILENAME, RESULT_DIR, USER_TEMPLATE_FILENAME};
+use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL, USER_TEMPLATE_FILENAME_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use russh_sftp::client::fs::ReadDir;
@@ -65,14 +65,15 @@ pub async fn run_tbprofiler(
     samples: String,
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
-    let command = format!(
+    let command_run_tbprofiler = format!(
         "sbatch --array 0-{} {} \"{}\"",
         items_checked - 1,
         config.tb_profiler_script.as_str(),
         samples
     );
-    println!("Running command: {}", command);
-    client.execute(&command).await?;
+    println!("Running command_run_tbprofiler: {:?}", command_run_tbprofiler);
+    let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
+    println!("command_checkdir executed: {:?}", commandexecutedresult_run_tbprofiler);
     Ok(())
 }
 
@@ -85,7 +86,7 @@ pub async fn download_results(
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     let remote_dir = config.remote_results_dir.as_str();
-    let local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR);
+    let local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
 
@@ -124,7 +125,7 @@ pub async fn delete_results (
     println!("Running command_rm: {}", command_rm);
     let commandexecutedresult_rm = client.execute(&command_rm).await?;
     println!("command_rm executed: {:?}", commandexecutedresult_rm);
-    let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR);
+    let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !directory.is_dir() {
         println!("Directory does not exist: {:?}", directory);
         return Ok(());
@@ -149,8 +150,8 @@ pub async fn download_default_template(
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join(RESULT_DIR)
-        .join(DEFAULT_TEMPLATE_FILENAME);
+        .join(RESULT_DIR_LOCAL)
+        .join(DEFAULT_TEMPLATE_FILENAME_LOCAL);
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
@@ -170,8 +171,8 @@ pub async fn upload_user_template(
     let local_file_path = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join(RESULT_DIR)
-        .join(USER_TEMPLATE_FILENAME);
+        .join(RESULT_DIR_LOCAL)
+        .join(USER_TEMPLATE_FILENAME_LOCAL);
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
@@ -255,7 +256,7 @@ pub fn log_error(message: &str) {
     let error_file = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join(RESULT_DIR)
+        .join(RESULT_DIR_LOCAL)
         .join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
@@ -269,7 +270,7 @@ pub fn delete_log_file() {
     let error_file = UserDirs::new()
         .unwrap()
         .home_dir()
-        .join(RESULT_DIR)
+        .join(RESULT_DIR_LOCAL)
         .join("error.log");
     println!("Attempting to delete: {:?}", error_file);
     if fs::remove_file(&error_file).is_ok() {

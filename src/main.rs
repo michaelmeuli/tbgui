@@ -6,9 +6,9 @@ mod config;
 
 use tbgui::Tbgui;
 
-const RESULT_DIR: &str = "tb-profiler-results";
-const DEFAULT_TEMPLATE_FILENAME: &str = "default_template.docx";
-const USER_TEMPLATE_FILENAME: &str = "user_template.docx";
+const RESULT_DIR_LOCAL: &str = "tb-profiler-results";
+const DEFAULT_TEMPLATE_FILENAME_LOCAL: &str = "default_template.docx";
+const USER_TEMPLATE_FILENAME_LOCAL: &str = "user_template.docx";
 
 pub fn main() -> iced::Result {
     tracing_subscriber::fmt::init();

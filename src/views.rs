@@ -1,6 +1,6 @@
 use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
-use crate::{DEFAULT_TEMPLATE_FILENAME, RESULT_DIR, USER_TEMPLATE_FILENAME};
+use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL, USER_TEMPLATE_FILENAME_LOCAL};
 use iced::alignment::Horizontal::Left;
 use iced::widget::{
     button, center, column, container, keyed_column, row, scrollable, svg, text, text_input, Space,
@@ -80,7 +80,7 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
     ];
     let template = column![
         text(format!(
-            "Download default template:\n\"{DEFAULT_TEMPLATE_FILENAME}\" to the directory \"{RESULT_DIR}\"\nin the user's home directory:"
+            "Download the default template\n\"{DEFAULT_TEMPLATE_FILENAME_LOCAL}\" to the local directory \"{RESULT_DIR_LOCAL}\"\nin the user's home directory:"
         ))
         .width(Fill)
         .size(16)
@@ -90,7 +90,7 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
             .width(250),
         Space::with_height(iced::Length::Fixed(20.0)),
         text(format!(
-            "Upload user template:\n\"{USER_TEMPLATE_FILENAME}\" in \"{RESULT_DIR}\"\nin the user's home directory to remote:"
+            "Upload the user template\n\"{USER_TEMPLATE_FILENAME_LOCAL}\" in the local directory \"{RESULT_DIR_LOCAL}\"\nto the remote:"
         ))
         .width(Fill)
         .size(16)
