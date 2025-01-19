@@ -191,7 +191,10 @@ impl Tbgui {
                             |_| Message::UploadedUserTemplate,
                         )
                     }
-                    Message::ProfilerRunCompleted => Task::none(),
+                    Message::ProfilerRunCompleted => {
+                        state.is_running = true;
+                        Task::none()
+                    },
                     Message::DownloadedResults => Task::none(),
                     Message::DeletedResults(result) => {
                         match result {
