@@ -338,9 +338,10 @@ impl Tbgui {
                 items,
                 error_message,
                 config,
+                is_running,
                 ..
             }) => match screen {
-                Screen::Home => view_home(filter, items, error_message),
+                Screen::Home => view_home(filter, items, error_message, is_running),
                 Screen::Settings => view_settings(),
                 Screen::Config => view_config(config),
             },
@@ -369,7 +370,7 @@ impl Tbgui {
             }
         });
         let periodic_subscription =
-            time::every(Duration::from_secs(1 * 60)).map(|_| Message::CheckIfRunning);
+            time::every(Duration::from_secs(10)).map(|_| Message::CheckIfRunning);
         Subscription::batch(vec![keyboard_subscription, periodic_subscription])
     }
 }
