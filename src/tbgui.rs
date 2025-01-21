@@ -194,7 +194,7 @@ impl Tbgui {
                     Message::ProfilerRunCompleted => {
                         state.is_running = true;
                         Task::none()
-                    },
+                    }
                     Message::DownloadedResults => Task::none(),
                     Message::DeletedResults(result) => {
                         match result {
@@ -325,7 +325,7 @@ impl Tbgui {
                     Message::CheckIfRunningCompleted(is_running) => {
                         state.is_running = is_running;
                         Task::none()
-                    },
+                    }
                 };
                 command
             }

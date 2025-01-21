@@ -21,11 +21,13 @@ pub fn view_home<'a>(
 
     let run_controls = row![
         button("Run Profiler").on_press(Message::RunTbProfiler),
-        button("Download Results").style(if *is_running {
-            button::danger
-        } else {
-            button::primary
-        }).on_press(Message::DownloadResults),
+        button("Download Results")
+            .style(if *is_running {
+                button::danger
+            } else {
+                button::primary
+            })
+            .on_press(Message::DownloadResults),
         button("Delete Results").on_press(Message::DeleteResults),
         Space::with_width(iced::Length::Fill),
         gear_button().on_press(Message::SettingsPressed),

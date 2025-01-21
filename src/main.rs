@@ -1,8 +1,8 @@
+mod config;
 mod tbgui;
+mod types;
 mod utils;
 mod views;
-mod types;
-mod config;
 
 use tbgui::Tbgui;
 
