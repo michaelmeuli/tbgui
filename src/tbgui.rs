@@ -149,7 +149,7 @@ impl Tbgui {
                                     Err("Client is None".to_string())
                                 }
                             },
-                            |result| Message::DeletedResults(result),
+                            Message::DeletedResults,
                         )
                     }
 
