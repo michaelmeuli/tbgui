@@ -86,12 +86,6 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         gear_button().on_press(Message::ConfigPressed),
     ];
     let template = column![
-        text(format!(
-            "Download the default template\n\"{DEFAULT_TEMPLATE_FILENAME_LOCAL}\" to the local directory \"{RESULT_DIR_LOCAL}\"\nin the user's home directory:"
-        ))
-        .width(Fill)
-        .size(16)
-        .align_x(Left),
         button("Download default template")
             .on_press(Message::DownloadDefaultTemplate)
             .width(250),

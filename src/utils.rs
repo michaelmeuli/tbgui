@@ -3,6 +3,7 @@ use crate::types::{Item, LoadError, RemoteState};
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL, USER_TEMPLATE_FILENAME_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
+use rfd::FileDialog;
 use russh_sftp::client::fs::ReadDir;
 use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
@@ -156,11 +157,30 @@ pub async fn download_default_template(
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
     let remote_file_path = config.default_template_remote.as_str();
-    let local_file_path = UserDirs::new()
-        .unwrap()
-        .home_dir()
-        .join(RESULT_DIR_LOCAL)
-        .join(DEFAULT_TEMPLATE_FILENAME_LOCAL);
+    let save_directory: Option<PathBuf> = FileDialog::new()
+        .set_title("Select Directory to Save Template")
+        .set_directory(UserDirs::new().unwrap().home_dir())
+        .pick_folder();
+    let save_directory = match save_directory {
+        Some(dir) => dir,
+        None => {
+            println!("No directory selected. Download canceled.");
+            return Ok(());
+        }
+    };
+    let file_name: Option<String> = FileDialog::new()
+        .set_title("Enter Filename for the Template")
+        .set_file_name(DEFAULT_TEMPLATE_FILENAME_LOCAL)
+        .save_file()
+        .and_then(|path| path.file_name().map(|name| name.to_string_lossy().to_string()));
+    let file_name = match file_name {
+        Some(name) => name,
+        None => {
+            println!("No filename specified. Download canceled.");
+            return Ok(());
+        }
+    };
+    let local_file_path = save_directory.join(file_name);
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
@@ -168,6 +188,8 @@ pub async fn download_default_template(
 
     if let Err(e) = download_file(&sftp, remote_file_path, &local_file_path).await {
         println!("Error downloading file: {:?}", e);
+    } else {
+        println!("File successfully downloaded to: {:?}", local_file_path);
     }
     Ok(())
 }
