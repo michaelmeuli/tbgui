@@ -1,5 +1,4 @@
 Roadmap for v0.1:
-- file picker for template
 - environment variables to configure paths (as in [loupe](https://gitlab.gnome.org/GNOME/loupe/-/blob/main/src/config.rs?ref_type=heads))
 - error handling (for all misconfigured paths)
 <br><br><br>
