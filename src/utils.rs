@@ -1,6 +1,6 @@
 use crate::config::TbguiConfig;
 use crate::types::{Item, LoadError, RemoteState};
-use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL, USER_TEMPLATE_FILENAME_LOCAL};
+use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use rfd::FileDialog;
@@ -172,7 +172,10 @@ pub async fn download_default_template(
         .set_title("Enter Filename for the Template")
         .set_file_name(DEFAULT_TEMPLATE_FILENAME_LOCAL)
         .save_file()
-        .and_then(|path| path.file_name().map(|name| name.to_string_lossy().to_string()));
+        .and_then(|path| {
+            path.file_name()
+                .map(|name| name.to_string_lossy().to_string())
+        });
     let file_name = match file_name {
         Some(name) => name,
         None => {
@@ -199,11 +202,17 @@ pub async fn upload_user_template(
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
     let remote_file_path = config.user_template_remote.as_str();
-    let local_file_path = UserDirs::new()
-        .unwrap()
-        .home_dir()
-        .join(RESULT_DIR_LOCAL)
-        .join(USER_TEMPLATE_FILENAME_LOCAL);
+    let local_file_path: Option<PathBuf> = FileDialog::new()
+        .set_title("Select File to Upload")
+        .set_directory(UserDirs::new().unwrap().home_dir())
+        .pick_file();
+    let local_file_path = match local_file_path {
+        Some(path) => path,
+        None => {
+            println!("No file selected. Upload canceled.");
+            return Ok(());
+        }
+    };
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;

@@ -1,6 +1,5 @@
 use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
-use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL, USER_TEMPLATE_FILENAME_LOCAL};
 use iced::alignment::Horizontal::Left;
 use iced::widget::{
     button, center, column, container, keyed_column, row, scrollable, svg, text, text_input, Space,
@@ -89,18 +88,11 @@ pub fn view_settings<'a>() -> Element<'a, Message> {
         button("Download default template")
             .on_press(Message::DownloadDefaultTemplate)
             .width(250),
-        Space::with_height(iced::Length::Fixed(20.0)),
-        text(format!(
-            "Upload the user template\n\"{USER_TEMPLATE_FILENAME_LOCAL}\" in the local directory \"{RESULT_DIR_LOCAL}\"\nto the remote:"
-        ))
-        .width(Fill)
-        .size(16)
-        .align_x(Left),
         button("Upload user template")
             .on_press(Message::UploadUserTemplate)
             .width(250),
     ]
-    .spacing(20);
+    .spacing(30);
 
     let content = column![
         title,
