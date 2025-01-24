@@ -127,12 +127,15 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = download_results(&client, &config).await {
-                                        println!("Error downloading results: {:?}", e);
-                                    }
+                                    download_results(&client, &config).await.map_err(|e| {
+                                        println!("Error returned from download_results(): {:?}", e);
+                                        format!("{:?}", e)
+                                    })
+                                } else {
+                                    Err("Client is None".to_string())
                                 }
                             },
-                            |_| Message::DownloadedResults,
+                            Message::DownloadedResults,
                         )
                     }
                     Message::DeleteResults => {
@@ -195,7 +198,17 @@ impl Tbgui {
                         state.is_running = true;
                         Task::none()
                     }
-                    Message::DownloadedResults => Task::none(),
+                    Message::DownloadedResults(result) => {
+                        match result {
+                            Ok(_) => {
+                                state.error_message = None;
+                            }
+                            Err(result) => {
+                                state.error_message = Some(result);
+                            }
+                        }
+                        Task::none()
+                    }
                     Message::DeletedResults(result) => {
                         match result {
                             Ok(_) => {

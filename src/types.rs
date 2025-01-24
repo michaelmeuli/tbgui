@@ -33,7 +33,7 @@ pub enum Message {
     ProfilerRunCompleted,
     DownloadDefaultTemplate,
     UploadUserTemplate,
-    DownloadedResults,
+    DownloadedResults(Result<(), String>),
     DeletedResults(Result<(), String>),
     DownloadedDefaultTemplate,
     UploadedUserTemplate,
