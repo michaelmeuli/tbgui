@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_TEMPLATE_FILENAME_LOCAL","RESULT_DIR_LOCAL"],"fn":["main"],"mod":["config","tbgui","types","utils","views"]};

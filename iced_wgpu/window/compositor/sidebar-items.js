@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Error"],"fn":["new","present","screenshot"],"struct":["Compositor"]};
