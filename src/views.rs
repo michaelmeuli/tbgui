@@ -212,6 +212,35 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
+pub fn view_info<'a>(error_message: &'a Option<String>) -> Element<'a, Message> {
+    let title = text("Info")
+        .width(Fill)
+        .size(60)
+        .color([0.5, 0.5, 0.5])
+        .align_x(Center);
+    let controls = row![
+        button("Home").on_press(Message::HomePressed).width(80),
+        Space::with_width(iced::Length::Fill),
+        gear_button().on_press(Message::ConfigPressed),
+    ];
+    let info: Element<_> = if let Some(error) = error_message {
+        empty_message(error)
+    } else {
+        empty_message("No info available...")
+    };
+
+    let content = column![
+        title,
+        controls,
+        Space::with_height(iced::Length::Fixed(40.0)),
+        info
+    ]
+    .spacing(20)
+    .max_width(800);
+
+    scrollable(container(content).center_x(Fill).padding(40)).into()
+}
+
 fn view_controls(items: &[Item], current_filter: Filter) -> Element<Message> {
     let items_checked = items.iter().filter(|item| item.is_checked).count();
 

@@ -61,6 +61,7 @@ pub enum Screen {
     Home,
     Settings,
     Config,
+    Info,
 }
 
 #[derive(Debug, Clone)]

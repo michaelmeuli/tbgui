@@ -205,6 +205,7 @@ impl Tbgui {
                             }
                             Err(result) => {
                                 state.error_message = Some(result);
+                                state.screen = Screen::Info;
                             }
                         }
                         Task::none()
@@ -360,6 +361,7 @@ impl Tbgui {
                 Screen::Home => view_home(filter, items, error_message, is_running),
                 Screen::Settings => view_settings(),
                 Screen::Config => view_config(config),
+                Screen::Info => view_info(error_message),
             },
         }
     }
