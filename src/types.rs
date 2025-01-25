@@ -12,6 +12,7 @@ pub struct State {
     pub items: Vec<Item>,
     pub client: Option<Client>,
     pub error_message: Option<String>,
+    pub info_message: Option<String>,
     pub config: TbguiConfig,
     pub is_running: bool,
 }

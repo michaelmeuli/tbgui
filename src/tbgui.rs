@@ -201,10 +201,11 @@ impl Tbgui {
                     Message::DownloadedResults(result) => {
                         match result {
                             Ok(_) => {
-                                state.error_message = None;
+                                state.info_message = Some("Results downloaded successfully".to_string());
+                                state.screen = Screen::Info;
                             }
                             Err(result) => {
-                                state.error_message = Some(result);
+                                state.info_message = Some(result);  
                                 state.screen = Screen::Info;
                             }
                         }
@@ -213,10 +214,12 @@ impl Tbgui {
                     Message::DeletedResults(result) => {
                         match result {
                             Ok(_) => {
-                                state.error_message = None;
+                                state.info_message = Some("Results deleted successfully".to_string());
+                                state.screen = Screen::Info;
                             }
                             Err(result) => {
-                                state.error_message = Some(result);
+                                state.info_message = Some(result);
+                                state.screen = Screen::Info;
                             }
                         }
                         Task::none()
@@ -354,6 +357,7 @@ impl Tbgui {
                 filter,
                 items,
                 error_message,
+                info_message,
                 config,
                 is_running,
                 ..
@@ -361,7 +365,7 @@ impl Tbgui {
                 Screen::Home => view_home(filter, items, error_message, is_running),
                 Screen::Settings => view_settings(),
                 Screen::Config => view_config(config),
-                Screen::Info => view_info(error_message),
+                Screen::Info => view_info(info_message),
             },
         }
     }

@@ -212,7 +212,7 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
-pub fn view_info<'a>(error_message: &'a Option<String>) -> Element<'a, Message> {
+pub fn view_info<'a>(info_message: &'a Option<String>) -> Element<'a, Message> {
     let title = text("Info")
         .width(Fill)
         .size(60)
@@ -220,10 +220,8 @@ pub fn view_info<'a>(error_message: &'a Option<String>) -> Element<'a, Message> 
         .align_x(Center);
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
-        Space::with_width(iced::Length::Fill),
-        gear_button().on_press(Message::ConfigPressed),
     ];
-    let info: Element<_> = if let Some(error) = error_message {
+    let info: Element<_> = if let Some(error) = info_message {
         empty_message(error)
     } else {
         empty_message("No info available...")
