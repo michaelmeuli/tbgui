@@ -1,5 +1,4 @@
 Roadmap for v0.1:
-- create new screen to display errors and infos
 - environment variables to configure paths (as in [loupe](https://gitlab.gnome.org/GNOME/loupe/-/blob/main/src/config.rs?ref_type=heads))
 - error handling (for all misconfigured paths)
 <br><br><br>
