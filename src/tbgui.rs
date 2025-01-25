@@ -201,12 +201,12 @@ impl Tbgui {
                     Message::DownloadedResults(result) => {
                         match result {
                             Ok(_) => {
-                                state.info_message = Some("Results downloaded successfully".to_string());
+                                state.info_view_message = Some("Results downloaded successfully".to_string());
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
-                                state.info_message = Some(result);  
-                                state.screen = Screen::Info;
+                                state.error_view_message = Some(result);  
+                                state.screen = Screen::Error;
                             }
                         }
                         Task::none()
@@ -214,12 +214,12 @@ impl Tbgui {
                     Message::DeletedResults(result) => {
                         match result {
                             Ok(_) => {
-                                state.info_message = Some("Results deleted successfully".to_string());
+                                state.info_view_message = Some("Results deleted successfully".to_string());
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
-                                state.info_message = Some(result);
-                                state.screen = Screen::Info;
+                                state.error_view_message = Some(result);
+                                state.screen = Screen::Error;
                             }
                         }
                         Task::none()
@@ -357,7 +357,8 @@ impl Tbgui {
                 filter,
                 items,
                 error_message,
-                info_message,
+                info_view_message,
+                error_view_message,
                 config,
                 is_running,
                 ..
@@ -365,7 +366,8 @@ impl Tbgui {
                 Screen::Home => view_home(filter, items, error_message, is_running),
                 Screen::Settings => view_settings(),
                 Screen::Config => view_config(config),
-                Screen::Info => view_info(info_message),
+                Screen::Info => view_info(info_view_message),
+                Screen::Error => view_error(error_view_message),
             },
         }
     }

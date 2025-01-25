@@ -12,7 +12,8 @@ pub struct State {
     pub items: Vec<Item>,
     pub client: Option<Client>,
     pub error_message: Option<String>,
-    pub info_message: Option<String>,
+    pub info_view_message: Option<String>,
+    pub error_view_message: Option<String>,
     pub config: TbguiConfig,
     pub is_running: bool,
 }
@@ -63,6 +64,7 @@ pub enum Screen {
     Settings,
     Config,
     Info,
+    Error,
 }
 
 #[derive(Debug, Clone)]

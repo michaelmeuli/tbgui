@@ -212,7 +212,7 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
-pub fn view_info<'a>(info_message: &'a Option<String>) -> Element<'a, Message> {
+pub fn view_info<'a>(info_view_message: &'a Option<String>) -> Element<'a, Message> {
     let title = text("Info")
         .width(Fill)
         .size(60)
@@ -221,7 +221,34 @@ pub fn view_info<'a>(info_message: &'a Option<String>) -> Element<'a, Message> {
     let controls = row![
         button("Home").on_press(Message::HomePressed).width(80),
     ];
-    let info: Element<_> = if let Some(error) = info_message {
+    let info: Element<_> = if let Some(info) = info_view_message {
+        empty_message(info)
+    } else {
+        empty_message("No info available...")
+    };
+
+    let content = column![
+        title,
+        controls,
+        Space::with_height(iced::Length::Fixed(40.0)),
+        info
+    ]
+    .spacing(20)
+    .max_width(800);
+
+    scrollable(container(content).center_x(Fill).padding(40)).into()
+}
+
+pub fn view_error<'a>(error_view_message: &'a Option<String>) -> Element<'a, Message> {
+    let title = text("Error")
+        .width(Fill)
+        .size(60)
+        .color([0.5, 0.5, 0.5])
+        .align_x(Center);
+    let controls = row![
+        button("Home").on_press(Message::HomePressed).width(80),
+    ];
+    let info: Element<_> = if let Some(error) = error_view_message {
         empty_message(error)
     } else {
         empty_message("No info available...")
