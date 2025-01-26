@@ -93,7 +93,17 @@ pub async fn download_results(
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     let remote_dir = config.remote_results_dir.as_str();
-    let local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
+    let local_dir: Option<PathBuf> = FileDialog::new()
+        .set_title("Select directory to download results")
+        .set_directory(UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL))
+        .pick_folder();
+    let local_dir = match local_dir {
+        Some(dir) => dir,
+        None => {
+            println!("No directory selected. Download canceled.");
+            return Ok(());
+        }
+    };
 
     // Check if the remote directory exists
     match sftp.metadata(remote_dir).await {
@@ -182,7 +192,7 @@ pub async fn download_default_template(
 ) -> Result<(), async_ssh2_tokio::Error> {
     let remote_file_path = config.default_template_remote.as_str();
     let save_directory: Option<PathBuf> = FileDialog::new()
-        .set_title("Select Directory to Save Template")
+        .set_title("Select directory to save template")
         .set_directory(UserDirs::new().unwrap().home_dir())
         .pick_folder();
     let save_directory = match save_directory {
