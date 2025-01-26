@@ -45,10 +45,10 @@ pub async fn get_raw_reads(
             "Directory on remote with raw reads does not exist: {}",
             remote_raw_dir
         ));
-        panic!(
-            "Directory on remote with raw reads does not exist: {}",
-            remote_raw_dir
-        );
+        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Remote directory does not exist: {:?}", remote_raw_dir),
+        )));
     }
 
     let command = format!("ls {}", remote_raw_dir);
@@ -323,11 +323,13 @@ pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
     match create_client(config).await {
         Ok(client) => {
             println!("Connected to the server");
+
             let reads = get_raw_reads(&client, config)
                 .await
-                .map_err(|e| LoadError {
-                    error: e.to_string(),
-                })?;
+                .map_err(|e| {
+                    println!("Error returned from download_results(): {:?}", e);
+                    format!("{:?}", e)
+            }).map_err(|e| LoadError { error: e.to_string() })?;
 
             let tasks = create_tasks(reads);
             Ok(RemoteState {
