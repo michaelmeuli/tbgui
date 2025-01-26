@@ -324,11 +324,11 @@ pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
         Ok(client) => {
             println!("Connected to the server");
 
-            let reads = get_raw_reads(&client, config)
-                .await
-                .map_err(|e| {
-                    println!("Error returned from download_results(): {:?}", e);
-                    LoadError { error: format!("{:?}", e) }
+            let reads = get_raw_reads(&client, config).await.map_err(|e| {
+                println!("Error returned from download_results(): {:?}", e);
+                LoadError {
+                    error: format!("{:?}", e),
+                }
             })?;
 
             let tasks = create_tasks(reads);
