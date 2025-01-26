@@ -328,8 +328,8 @@ pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
                 .await
                 .map_err(|e| {
                     println!("Error returned from download_results(): {:?}", e);
-                    format!("{:?}", e)
-            }).map_err(|e| LoadError { error: e.to_string() })?;
+                    LoadError { error: format!("{:?}", e) }
+            })?;
 
             let tasks = create_tasks(reads);
             Ok(RemoteState {
