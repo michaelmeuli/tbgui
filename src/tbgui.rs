@@ -18,7 +18,10 @@ pub enum Tbgui {
 
 impl Tbgui {
     pub fn new() -> (Self, Task<Message>) {
-        let cfg = async { confy::load("tbgui", None) };
+        let cfg = async {
+            delete_log_file();
+            confy::load("tbgui", None)
+        };
         (
             Self::Loading,
             Task::perform(
@@ -49,21 +52,61 @@ impl Tbgui {
                     }
                     _ => {}
                 }
-                Task::done(Message::LoadRemoteState)
+                Task::done(Message::CreateClient)
             }
             Tbgui::Loaded(state) => {
                 let command = match message {
-                    Message::LoadRemoteState => {
+                    Message::CreateClient => {
                         let config = state.config.clone();
                         Task::perform(
-                            async move { load(&config).await },
+                            async move { create_client(&config).await },
+                            Message::LoadRemoteState,
+                        )
+                    }
+                    Message::LoadRemoteState(result) => match result {
+                        Ok(client) => {
+                            state.client = Some(client);
+                            let client = state.client.clone();
+                            let config = state.config.clone();
+                            Task::perform(
+                                async move {
+                                    if let Some(client) = client {
+                                        get_raw_reads(&client, &config).await
+                                    } else {
+                                        Err(LoadError {
+                                            error: "Client is None".to_string(),
+                                        })
+                                    }
+                                },
+                                Message::LoadedRemoteState,
+                            )
+                        }
+                        Err(e) => {
+                            state.error_message = Some(e.error);
+                            Task::none()
+                        }
+                    },
+                    Message::ReloadRemoteState => {
+                        println!("Reloading remote state");
+                        state.error_message = None;
+                        let client = state.client.clone();
+                        let config = state.config.clone();
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    get_raw_reads(&client, &config).await
+                                } else {
+                                    Err(LoadError {
+                                        error: "Client is None".to_string(),
+                                    })
+                                }
+                            },
                             Message::LoadedRemoteState,
                         )
                     }
                     Message::LoadedRemoteState(result) => match result {
                         Ok(remote_state) => {
                             state.items = remote_state.items;
-                            state.client = Some(remote_state.client);
                             Task::none()
                         }
                         Err(e) => {
@@ -162,7 +205,7 @@ impl Tbgui {
                     }
                     Message::HomePressed => {
                         state.screen = Screen::Home;
-                        Task::none()
+                        Task::done(Message::ReloadRemoteState)
                     }
                     Message::DownloadDefaultTemplate => {
                         let client = state.client.clone();
@@ -201,11 +244,12 @@ impl Tbgui {
                     Message::DownloadedResults(result) => {
                         match result {
                             Ok(_) => {
-                                state.info_view_message = Some("Results downloaded successfully".to_string());
+                                state.info_view_message =
+                                    Some("Results downloaded successfully".to_string());
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
-                                state.error_view_message = Some(result);  
+                                state.error_view_message = Some(result);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -214,7 +258,8 @@ impl Tbgui {
                     Message::DeletedResults(result) => {
                         match result {
                             Ok(_) => {
-                                state.info_view_message = Some("Results deleted successfully".to_string());
+                                state.info_view_message =
+                                    Some("Results deleted successfully".to_string());
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {

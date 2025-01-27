@@ -21,8 +21,10 @@ pub struct State {
 #[derive(Debug, Clone)]
 pub enum Message {
     Loaded(Result<TbguiConfig, LoadError>),
-    LoadRemoteState,
+    CreateClient,
+    LoadRemoteState(Result<Client, LoadError>),
     LoadedRemoteState(Result<RemoteState, LoadError>),
+    ReloadRemoteState,
     FilterChanged(Filter),
     Item(usize, ItemMessage),
     TabPressed { shift: bool },
@@ -123,6 +125,5 @@ pub struct LoadError {
 
 #[derive(Debug, Clone)]
 pub struct RemoteState {
-    pub client: Client,
     pub items: Vec<Item>,
 }

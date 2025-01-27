@@ -16,7 +16,7 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
 
-pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
+pub async fn create_client(config: &TbguiConfig) -> Result<Client, LoadError> {
     let key_path = UserDirs::new()
         .unwrap()
         .home_dir()
@@ -29,35 +29,49 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_to
         auth_method,
         ServerCheckMethod::NoCheck,
     )
-    .await?;
+    .await
+    .map_err(|e| {
+        println!("Failed to connect to the server: {}", e);
+        let error = format!("{}", e);
+        log_error(error.as_str());
+        LoadError { error }
+    })?;
     Ok(client)
 }
 
 pub async fn get_raw_reads(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<Vec<String>, async_ssh2_tokio::Error> {
+) -> Result<RemoteState, LoadError> {
     let remote_raw_dir: &str = config.remote_raw_dir.as_str();
     let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
-    let result = client.execute(&command).await?;
+    let result = client.execute(&command).await.map_err(|e| {
+        log_error(&format!("Failed to check if remote directory exists: {:?}", e));
+        LoadError { error: format!("{:?}", e) }
+    })?;
     if result.stdout.trim() != "exists" {
         log_error(&format!(
-            "Directory on remote with raw reads does not exist: {}",
+            "Directory on remote with raw reads does not exist: {:?}",
             remote_raw_dir
         ));
-        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            format!("Remote directory does not exist: {:?}", remote_raw_dir),
-        )));
+        return Err(LoadError {
+            error: format!("Remote directory does not exist: {:?}", remote_raw_dir),
+        });
     }
 
     let command = format!("ls {}", remote_raw_dir);
-    let result = client.execute(&command).await?;
+    let result = client.execute(&command).await.map_err(|e| {
+        log_error(&format!("Failed to list files in remote directory: {:?}", e));
+        LoadError { error: format!("{:?}", e) }
+    })?;
     assert_eq!(result.exit_status, 0);
     let stdout = result.stdout;
 
     let raw_reads: Vec<String> = stdout.lines().map(String::from).collect();
-    Ok(raw_reads)
+    let tasks = create_tasks(raw_reads);
+    Ok(RemoteState {
+        items: tasks,
+    })
 }
 
 pub async fn run_tbprofiler(
@@ -316,34 +330,6 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
         }
     }
     tasks
-}
-
-pub async fn load(config: &TbguiConfig) -> Result<RemoteState, LoadError> {
-    delete_log_file();
-    match create_client(config).await {
-        Ok(client) => {
-            println!("Connected to the server");
-
-            let reads = get_raw_reads(&client, config).await.map_err(|e| {
-                println!("Error returned from download_results(): {:?}", e);
-                LoadError {
-                    error: format!("{:?}", e),
-                }
-            })?;
-
-            let tasks = create_tasks(reads);
-            Ok(RemoteState {
-                client,
-                items: tasks,
-            })
-        }
-        Err(e) => {
-            println!("Failed to connect to the server: {}", e);
-            let error = format!("{}", e);
-            log_error(error.as_str());
-            Err(LoadError { error })
-        }
-    }
 }
 
 pub fn log_error(message: &str) {
