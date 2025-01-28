@@ -46,12 +46,12 @@ pub async fn get_raw_reads(
             e
         ));
         LoadError {
-            error: format!("{:?}", e),
+            error: format!("Failed to check if remote directory exists: {:?}", e),
         }
     })?;
     if result.stdout.trim() != "exists" {
         log_error(&format!(
-            "Directory on remote with raw reads does not exist: {:?}",
+            "Remote directory does not exist: {:?}",
             remote_raw_dir
         ));
         return Err(LoadError {
@@ -66,7 +66,7 @@ pub async fn get_raw_reads(
             e
         ));
         LoadError {
-            error: format!("{:?}", e),
+            error: format!("Failed to list files in remote directory: {:?}", e),
         }
     })?;
     assert_eq!(result.exit_status, 0);
