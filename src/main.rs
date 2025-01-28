@@ -1,9 +1,9 @@
 mod config;
+mod ssh;
 mod tbgui;
 mod types;
 mod utils;
 mod views;
-mod ssh;
 
 use tbgui::Tbgui;
 

@@ -1,10 +1,56 @@
+use crate::config::TbguiConfig;
 use crate::types::Item;
 use crate::RESULT_DIR_LOCAL;
+use async_ssh2_tokio::client::Client;
 use directories_next::UserDirs;
+use russh_sftp::{client::SftpSession, protocol::OpenFlags};
 use std::collections::HashSet;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
+use tokio::fs::{create_dir_all, File};
+use tokio::io::AsyncReadExt;
+use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
+
+pub async fn download_file(
+    sftp: &SftpSession,
+    remote_file_path: &str,
+    local_file_path: &PathBuf,
+) -> Result<(), async_ssh2_tokio::Error> {
+    println!("Downloading: {}", remote_file_path);
+    let mut remote_file = sftp
+        .open_with_flags(remote_file_path, OpenFlags::READ)
+        .await?;
+    if let Some(parent) = Path::new(local_file_path).parent() {
+        create_dir_all(parent).await?;
+    }
+    let mut local_file = File::create(local_file_path.clone()).await?;
+    let mut buffer = [0u8; 4096];
+
+    loop {
+        let n = remote_file.read(&mut buffer).await?;
+        if n == 0 {
+            break; // End of file
+        }
+        local_file.write_all(&buffer[..n]).await?;
+    }
+    println!("File downloaded successfully to {:?}", local_file_path);
+    Ok(())
+}
+
+pub async fn check_if_running(
+    client: &Client,
+    config: &TbguiConfig,
+) -> Result<bool, async_ssh2_tokio::Error> {
+    let command_check_running = format!("squeue -u {}", config.username.as_str());
+    let commandexecutedresult_check_if_running = client.execute(&command_check_running).await?;
+    let running = commandexecutedresult_check_if_running
+        .stdout
+        .contains(config.username.as_str());
+    Ok(running)
+}
 
 pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     let mut tasks = Vec::new();
