@@ -3,6 +3,7 @@ use crate::types::LoadError;
 use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
+use crate::ssh::*;
 use iced::futures::TryFutureExt;
 use iced::widget;
 use iced::window;
