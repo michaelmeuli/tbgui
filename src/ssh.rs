@@ -39,26 +39,7 @@ pub async fn get_raw_reads(
     config: &TbguiConfig,
 ) -> Result<RemoteState, LoadError> {
     let remote_raw_dir: &str = config.remote_raw_dir.as_str();
-    let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
-    let result = client.execute(&command).await.map_err(|e| {
-        log_error(&format!(
-            "Failed to check if remote directory exists: {:?}",
-            e
-        ));
-        LoadError {
-            error: format!("Failed to check if remote directory exists: {:?}", e),
-        }
-    })?;
-    if result.stdout.trim() != "exists" {
-        log_error(&format!(
-            "Remote directory does not exist: {:?}",
-            remote_raw_dir
-        ));
-        return Err(LoadError {
-            error: format!("Remote directory does not exist: {:?}", remote_raw_dir),
-        });
-    }
-
+    check_if_dir_exists(&client, &remote_raw_dir).await?;
     let command = format!("ls {}", remote_raw_dir);
     let result = client.execute(&command).await.map_err(|e| {
         log_error(&format!(
