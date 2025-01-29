@@ -103,33 +103,9 @@ pub async fn download_results(
             return Ok(());
         }
     };
-
-    // Check if the remote directory exists
-    match sftp.metadata(remote_dir).await {
-        Ok(metadata) => {
-            if !metadata.is_dir() {
-                println!("Remote path exists but is not a directory: {}", remote_dir);
-                return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-                    std::io::ErrorKind::InvalidInput,
-                    "Specified remote path is not a directory",
-                )));
-            }
-        }
-        Err(e) => {
-            println!(
-                "Remote directory does not exist: {}. Error: {:?}",
-                remote_dir, e
-            );
-            return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("No such directory: {:?}", remote_dir),
-            )));
-        }
-    }
-
+    check_if_dir_exists(&client, &remote_dir).await?;
     create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
-
     for entry in entries {
         let file_name = entry.file_name();
         let file_type = entry.file_type();
