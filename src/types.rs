@@ -34,7 +34,7 @@ pub enum Message {
     DeleteResults,
     SettingsPressed,
     HomePressed,
-    ProfilerRunCompleted,
+    ProfilerRunCompleted(Result<String, String>),
     DownloadDefaultTemplate,
     UploadUserTemplate,
     DownloadedResults(Result<(), String>),

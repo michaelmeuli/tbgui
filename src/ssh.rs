@@ -64,23 +64,24 @@ pub async fn run_tbprofiler(
     items_checked: usize,
     samples: String,
     config: &TbguiConfig,
-) -> Result<(), async_ssh2_tokio::Error> {
+) -> Result<String, async_ssh2_tokio::Error> {
     let command_run_tbprofiler = format!(
         "sbatch --array 0-{} {} \"{}\"",
         items_checked - 1,
         config.tb_profiler_script.as_str(),
         samples
     );
-    println!(
-        "Running command_run_tbprofiler: {:?}",
-        command_run_tbprofiler
-    );
     let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
-    println!(
-        "command_checkdir executed: {:?}",
-        commandexecutedresult_run_tbprofiler
-    );
-    Ok(())
+    if commandexecutedresult_run_tbprofiler.exit_status != 0 {
+        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!(
+                "Failed to run tbprofiler: {:?}",
+                commandexecutedresult_run_tbprofiler
+            ),
+        )));
+    }
+    Ok(commandexecutedresult_run_tbprofiler.stdout)
 }
 
 pub async fn download_results(

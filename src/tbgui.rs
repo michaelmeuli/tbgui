@@ -159,15 +159,17 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) =
-                                        run_tbprofiler(&client, items_checked, samples, &config)
-                                            .await
-                                    {
-                                        println!("Error running tbprofiler: {:?}", e);
-                                    }
+                                    run_tbprofiler(&client, items_checked, samples, &config)
+                                        .await
+                                        .map_err(|e| {
+                                            println!("Error running tbprofiler: {:?}", e);
+                                            format!("{:?}", e)
+                                        })
+                                } else {
+                                    Err("Client is None".to_string())
                                 }
                             },
-                            |_| Message::ProfilerRunCompleted,
+                            Message::ProfilerRunCompleted,
                         )
                     }
                     Message::DownloadResults => {
@@ -243,7 +245,18 @@ impl Tbgui {
                             |_| Message::UploadedUserTemplate,
                         )
                     }
-                    Message::ProfilerRunCompleted => {
+                    Message::ProfilerRunCompleted(result) => {
+                        match result {
+                            Ok(result) => {
+                                state.info_view_message =
+                                    Some(format!("Batch started successfully: {}", result));
+                                state.screen = Screen::Info;
+                            }
+                            Err(result) => {
+                                state.error_view_message = Some(result);
+                                state.screen = Screen::Error;
+                            }
+                        }
                         state.is_running = true;
                         Task::none()
                     }
