@@ -1,6 +1,5 @@
 use crate::config::TbguiConfig;
 use crate::types::Item;
-use crate::types::LoadError;
 use crate::RESULT_DIR_LOCAL;
 use async_ssh2_tokio::client::Client;
 use directories_next::UserDirs;
@@ -71,27 +70,31 @@ pub fn create_tasks(reads: Vec<String>) -> Vec<Item> {
     tasks
 }
 
-pub async fn check_if_dir_exists(client: &Client, remote_raw_dir: &str) -> Result<(), LoadError> {
+pub async fn check_if_dir_exists(
+    client: &Client,
+    remote_raw_dir: &str,
+) -> Result<(), async_ssh2_tokio::Error> {
     let command = format!("test -d {} && echo 'exists'", remote_raw_dir);
     let result = client.execute(&command).await.map_err(|e| {
         log_error(&format!(
             "Failed to check if remote directory exists: {:?}",
             e
         ));
-        LoadError {
-            error: format!("Failed to check if remote directory exists: {:?}", e),
-        }
+        async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to check if remote directory exists: {:?}", e),
+        ))
     })?;
     if result.stdout.trim() != "exists" {
         log_error(&format!(
             "Remote directory does not exist: {:?}",
             remote_raw_dir
         ));
-        return Err(LoadError {
-            error: format!("Remote directory does not exist: {:?}", remote_raw_dir),
-        });
-    }
-    else {
+        Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Remote directory does not exist: {:?}", remote_raw_dir),
+        )))
+    } else {
         Ok(())
     }
 }

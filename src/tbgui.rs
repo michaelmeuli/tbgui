@@ -1,9 +1,9 @@
 use crate::config::TbguiConfig;
+use crate::ssh::*;
 use crate::types::LoadError;
 use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
-use crate::ssh::*;
 use iced::futures::TryFutureExt;
 use iced::widget;
 use iced::window;
@@ -72,11 +72,15 @@ impl Tbgui {
                             Task::perform(
                                 async move {
                                     if let Some(client) = client {
-                                        get_raw_reads(&client, &config).await
-                                    } else {
-                                        Err(LoadError {
-                                            error: "Client is None".to_string(),
+                                        get_raw_reads(&client, &config).await.map_err(|e| {
+                                            println!(
+                                                "Error returned from get_raw_reads(): {:?}",
+                                                e
+                                            );
+                                            format!("{:?}", e)
                                         })
+                                    } else {
+                                        Err("Client is None".to_string())
                                     }
                                 },
                                 Message::LoadedRemoteState,
@@ -95,11 +99,12 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    get_raw_reads(&client, &config).await
-                                } else {
-                                    Err(LoadError {
-                                        error: "Client is None".to_string(),
+                                    get_raw_reads(&client, &config).await.map_err(|e| {
+                                        println!("Error returned from get_raw_reads(): {:?}", e);
+                                        format!("{:?}", e)
                                     })
+                                } else {
+                                    Err("Client is None".to_string())
                                 }
                             },
                             Message::LoadedRemoteState,
@@ -111,7 +116,7 @@ impl Tbgui {
                             Task::none()
                         }
                         Err(e) => {
-                            state.error_message = Some(e.error);
+                            state.error_message = Some(e);
                             Task::none()
                         }
                     },

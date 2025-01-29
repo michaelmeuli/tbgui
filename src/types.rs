@@ -23,7 +23,7 @@ pub enum Message {
     Loaded(Result<TbguiConfig, LoadError>),
     CreateClient,
     LoadRemoteState(Result<Client, LoadError>),
-    LoadedRemoteState(Result<RemoteState, LoadError>),
+    LoadedRemoteState(Result<RemoteState, String>),
     ReloadRemoteState,
     FilterChanged(Filter),
     Item(usize, ItemMessage),

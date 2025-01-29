@@ -37,7 +37,7 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, LoadError> {
 pub async fn get_raw_reads(
     client: &Client,
     config: &TbguiConfig,
-) -> Result<RemoteState, LoadError> {
+) -> Result<RemoteState, async_ssh2_tokio::Error> {
     let remote_raw_dir: &str = config.remote_raw_dir.as_str();
     check_if_dir_exists(&client, &remote_raw_dir).await?;
     let command = format!("ls {}", remote_raw_dir);
@@ -46,9 +46,10 @@ pub async fn get_raw_reads(
             "Failed to list files in remote directory: {:?}",
             e
         ));
-        LoadError {
-            error: format!("Failed to list files in remote directory: {:?}", e),
-        }
+        async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to list files in remote directory: {:?}", e),
+        ))
     })?;
     assert_eq!(result.exit_status, 0);
     let stdout = result.stdout;
