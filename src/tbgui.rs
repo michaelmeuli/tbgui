@@ -253,6 +253,7 @@ impl Tbgui {
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
+                                log_error(&result);
                                 state.error_view_message = Some(result);
                                 state.screen = Screen::Error;
                             }
@@ -268,6 +269,7 @@ impl Tbgui {
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
+                                log_error(&result);
                                 state.error_view_message = Some(result);
                                 state.screen = Screen::Error;
                             }

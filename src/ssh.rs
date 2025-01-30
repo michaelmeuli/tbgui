@@ -98,27 +98,23 @@ pub async fn download_results(
         .set_directory(UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL))
         .pick_folder();
     let local_dir = match local_dir {
-        Some(dir) => dir,
-        None => {
-            println!("No directory selected. Download canceled.");
-            return Ok(());
-        }
-    };
+            Some(dir) => dir,
+            None => return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "No directory selected",
+            ))),
+        };
     check_if_dir_exists(&client, &remote_dir).await?;
     create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
     for entry in entries {
         let file_name = entry.file_name();
         let file_type = entry.file_type();
-        //let metadata = entry.metadata();
-        println!("File: {}", file_name);
         let remote_file_path = format!("{}/{}", remote_dir, file_name);
         let local_file_path = local_dir.join(&file_name).clone();
 
         if file_type.is_file() && (file_name).ends_with(".docx") {
-            if let Err(e) = download_file(&sftp, &remote_file_path, &local_file_path).await {
-                println!("Error downloading file: {:?}", e);
-            }
+            download_file(&sftp, &remote_file_path, &local_file_path).await?;
         }
     }
     Ok(())
