@@ -92,12 +92,14 @@ pub async fn download_results(
         .set_directory(UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL))
         .pick_folder();
     let local_dir = match local_dir {
-            Some(dir) => dir,
-            None => return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+        Some(dir) => dir,
+        None => {
+            return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 "No directory selected",
-            ))),
-        };
+            )))
+        }
+    };
     check_if_dir_exists(client, remote_dir).await?;
     create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;

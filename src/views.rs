@@ -218,9 +218,7 @@ pub fn view_info(info_view_message: &Option<String>) -> Element<'_, Message> {
         .size(60)
         .color([0.5, 0.5, 0.5])
         .align_x(Center);
-    let controls = row![
-        button("Home").on_press(Message::HomePressed).width(80),
-    ];
+    let controls = row![button("Home").on_press(Message::HomePressed).width(80),];
     let info: Element<_> = if let Some(info) = info_view_message {
         empty_message(info)
     } else {
@@ -245,9 +243,7 @@ pub fn view_error(error_view_message: &Option<String>) -> Element<'_, Message> {
         .size(60)
         .color([0.5, 0.5, 0.5])
         .align_x(Center);
-    let controls = row![
-        button("Home").on_press(Message::HomePressed).width(80),
-    ];
+    let controls = row![button("Home").on_press(Message::HomePressed).width(80),];
     let info: Element<_> = if let Some(error) = error_view_message {
         empty_message(error)
     } else {
