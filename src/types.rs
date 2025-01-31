@@ -20,9 +20,9 @@ pub struct State {
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    Loaded(Result<TbguiConfig, LoadError>),
+    Loaded(Result<TbguiConfig, String>),
     CreateClient,
-    LoadRemoteState(Result<Client, LoadError>),
+    LoadRemoteState(Result<Client, String>),
     LoadedRemoteState(Result<RemoteState, String>),
     ReloadRemoteState,
     FilterChanged(Filter),
@@ -116,11 +116,6 @@ impl Filter {
             Filter::Checked => item.is_checked,
         }
     }
-}
-
-#[derive(Debug, Clone)]
-pub struct LoadError {
-    pub error: String,
 }
 
 #[derive(Debug, Clone)]

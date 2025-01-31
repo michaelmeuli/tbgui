@@ -1,5 +1,5 @@
 use crate::config::TbguiConfig;
-use crate::types::{LoadError, RemoteState};
+use crate::types::RemoteState;
 use crate::utils::*;
 use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
@@ -11,7 +11,7 @@ use std::fs;
 use std::path::PathBuf;
 use tokio::fs::create_dir_all;
 
-pub async fn create_client(config: &TbguiConfig) -> Result<Client, LoadError> {
+pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = UserDirs::new()
         .unwrap()
         .home_dir()
@@ -24,13 +24,7 @@ pub async fn create_client(config: &TbguiConfig) -> Result<Client, LoadError> {
         auth_method,
         ServerCheckMethod::NoCheck,
     )
-    .await
-    .map_err(|e| {
-        println!("Failed to connect to the server: {}", e);
-        let error = format!("{}", e);
-        log_error(error.as_str());
-        LoadError { error }
-    })?;
+    .await?;
     Ok(client)
 }
 

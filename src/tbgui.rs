@@ -1,6 +1,5 @@
 use crate::config::TbguiConfig;
 use crate::ssh::*;
-use crate::types::LoadError;
 use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
@@ -26,8 +25,9 @@ impl Tbgui {
         (
             Self::Loading,
             Task::perform(
-                cfg.map_err(|e| LoadError {
-                    error: e.to_string(),
+                cfg.map_err(|e| {
+                    println!("Error loading config: {:?}", e);
+                    format!("{:?}", e)
                 }),
                 Message::Loaded,
             ),
@@ -60,7 +60,12 @@ impl Tbgui {
                     Message::CreateClient => {
                         let config = state.config.clone();
                         Task::perform(
-                            async move { create_client(&config).await },
+                            async move {
+                                create_client(&config).await.map_err(|e| {
+                                    println!("Error returned from create_client(): {:?}", e);
+                                    format!("{:?}", e)
+                                })
+                            },
                             Message::LoadRemoteState,
                         )
                     }
@@ -87,7 +92,8 @@ impl Tbgui {
                             )
                         }
                         Err(e) => {
-                            state.error_message = Some(e.error);
+                            log_error(&e);
+                            state.error_message = Some(e);
                             Task::none()
                         }
                     },
@@ -116,6 +122,7 @@ impl Tbgui {
                             Task::none()
                         }
                         Err(e) => {
+                            log_error(&e);
                             state.error_message = Some(e);
                             Task::none()
                         }
