@@ -1,0 +1,1 @@
+searchState.loadedDescShard("window_clipboard", 0, "Safety: the display handle must be valid for the lifetime …\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.")
