@@ -212,7 +212,7 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
-pub fn view_info<'a>(info_view_message: &'a Option<String>) -> Element<'a, Message> {
+pub fn view_info(info_view_message: &Option<String>) -> Element<'_, Message> {
     let title = text("Info")
         .width(Fill)
         .size(60)
@@ -239,7 +239,7 @@ pub fn view_info<'a>(info_view_message: &'a Option<String>) -> Element<'a, Messa
     scrollable(container(content).center_x(Fill).padding(40)).into()
 }
 
-pub fn view_error<'a>(error_view_message: &'a Option<String>) -> Element<'a, Message> {
+pub fn view_error(error_view_message: &Option<String>) -> Element<'_, Message> {
     let title = text("Error")
         .width(Fill)
         .size(60)

@@ -33,7 +33,7 @@ pub async fn get_raw_reads(
     config: &TbguiConfig,
 ) -> Result<RemoteState, async_ssh2_tokio::Error> {
     let remote_raw_dir: &str = config.remote_raw_dir.as_str();
-    check_if_dir_exists(&client, &remote_raw_dir).await?;
+    check_if_dir_exists(client, remote_raw_dir).await?;
     let command = format!("ls {}", remote_raw_dir);
     let result = client.execute(&command).await.map_err(|e| {
         log_error(&format!(
@@ -98,7 +98,7 @@ pub async fn download_results(
                 "No directory selected",
             ))),
         };
-    check_if_dir_exists(&client, &remote_dir).await?;
+    check_if_dir_exists(client, remote_dir).await?;
     create_dir_all(local_dir.clone()).await?;
     let entries: ReadDir = sftp.read_dir(remote_dir).await?;
     for entry in entries {
