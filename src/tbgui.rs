@@ -42,14 +42,17 @@ impl Tbgui {
         match self {
             Tbgui::Loading => {
                 match message {
-                    Message::Loaded(Ok(state)) => {
-                        *self = Tbgui::Loaded(State {
-                            config: state,
-                            ..State::default()
-                        });
-                    }
-                    Message::Loaded(Err(_)) => {
-                        *self = Tbgui::Loaded(State::default());
+                    Message::Loaded(result) => match result {
+                        Ok(state) => {
+                            *self = Tbgui::Loaded(State {
+                                config: state,
+                                ..State::default()
+                            });
+                        }
+                        Err(e) => {
+                            log_error(&e);
+                            *self = Tbgui::Loaded(State::default());
+                        }
                     }
                     _ => {}
                 }
@@ -98,7 +101,6 @@ impl Tbgui {
                         }
                     },
                     Message::ReloadRemoteState => {
-                        println!("Reloading remote state");
                         state.error_message = None;
                         let client = state.client.clone();
                         let config = state.config.clone();
