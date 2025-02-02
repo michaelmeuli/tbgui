@@ -162,7 +162,6 @@ impl Tbgui {
                     },
                     Message::FilterChanged(filter) => {
                         state.filter = filter;
-
                         Task::none()
                     }
                     Message::Item(i, item_message) => {
@@ -260,14 +259,15 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) =
-                                        download_default_template(&client, &config).await
-                                    {
-                                        println!("Error downloading default template: {:?}", e);
-                                    }
+                                    download_default_template(&client, &config).await.map_err(|e| {
+                                            println!("Error returned from download_default_template(): {:?}", e);
+                                            format!("{:?}", e)
+                                        })
+                                } else {
+                                    Err("Error downloading default template".to_string())
                                 }
                             },
-                            |_| Message::DownloadedDefaultTemplate,
+                            Message::DownloadedDefaultTemplate,
                         )
                     }
                     Message::UploadUserTemplate => {
@@ -329,7 +329,20 @@ impl Tbgui {
                         }
                         Task::none()
                     }
-                    Message::DownloadedDefaultTemplate => Task::none(),
+                    Message::DownloadedDefaultTemplate(result) => {
+                        match result {
+                            Ok(_) => {
+                                state.info_view_message =
+                                    Some("Default template downloaded successfully".to_string());
+                                state.screen = Screen::Info;
+                            }
+                            Err(result) => {
+                                state.error_view_message = Some(result);
+                                state.screen = Screen::Error;
+                            }
+                        }
+                        Task::none()
+                    }
                     Message::UploadedUserTemplate => Task::none(),
                     Message::ConfigPressed => {
                         state.screen = Screen::Config;
