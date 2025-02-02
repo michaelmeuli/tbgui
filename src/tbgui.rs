@@ -276,12 +276,15 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    if let Err(e) = upload_user_template(&client, &config).await {
-                                        println!("Error uploading user template: {:?}", e);
-                                    }
+                                    upload_user_template(&client, &config).await.map_err(|e| {
+                                            println!("Error returned from upload_user_template(): {:?}", e);
+                                            format!("{:?}", e)
+                                        })
+                                } else {
+                                    Err("Error uploading user template".to_string())
                                 }
                             },
-                            |_| Message::UploadedUserTemplate,
+                            Message::UploadedUserTemplate,
                         )
                     }
                     Message::ProfilerRunCompleted(result) => {
@@ -323,6 +326,7 @@ impl Tbgui {
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
+                                log_error(&result);
                                 state.error_view_message = Some(result);
                                 state.screen = Screen::Error;
                             }
@@ -337,13 +341,28 @@ impl Tbgui {
                                 state.screen = Screen::Info;
                             }
                             Err(result) => {
+                                log_error(&result);
                                 state.error_view_message = Some(result);
                                 state.screen = Screen::Error;
                             }
                         }
                         Task::none()
                     }
-                    Message::UploadedUserTemplate => Task::none(),
+                    Message::UploadedUserTemplate(result) => {
+                        match result {
+                            Ok(_) => {
+                                state.info_view_message =
+                                    Some("User template uploaded successfully".to_string());
+                                state.screen = Screen::Info;
+                            }
+                            Err(result) => {
+                                log_error(&result);
+                                state.error_view_message = Some(result);
+                                state.screen = Screen::Error;
+                            }
+                        }
+                        Task::none()
+                    }
                     Message::ConfigPressed => {
                         state.screen = Screen::Config;
                         Task::none()
@@ -429,7 +448,6 @@ impl Tbgui {
                     Message::CheckIfRunning => {
                         let client = state.client.clone();
                         let config = state.config.clone();
-
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
