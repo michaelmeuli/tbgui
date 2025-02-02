@@ -1,11 +1,26 @@
 use serde::{Deserialize, Serialize};
 
 pub const TBGUI_USERNAME: &str = default_env(option_env!("TBGUI_USERNAME"), "mimeul");
-pub const REMOTE_RAW_DIR: &str = default_env(option_env!("REMOTE_RAW_DIR"), "/shares/sander.imm.uzh/MM/PRJEB57919/raw");
-pub const TB_PROFILER_SCRIPT: &str = default_env(option_env!("TB_PROFILER_SCRIPT"), "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh");
-pub const REMOTE_RESULTS_DIR: &str = default_env(option_env!("REMOTE_RESULTS_DIR"), "/shares/sander.imm.uzh/MM/PRJEB57919/out/results");
-pub const DEFAULT_TEMPLATE_REMOTE: &str = default_env(option_env!("DEFAULT_TEMPLATE_REMOTE"), "/shares/sander.imm.uzh/MM/PRJEB57919/tb-profiler-templates/docx/default_template.docx");
-pub const USER_TEMPLATE_REMOTE: &str = default_env(option_env!("USER_TEMPLATE_REMOTE"), "/shares/sander.imm.uzh/MM/PRJEB57919/template/user_template.docx");
+pub const REMOTE_RAW_DIR: &str = default_env(
+    option_env!("REMOTE_RAW_DIR"),
+    "/shares/sander.imm.uzh/MM/PRJEB57919/raw",
+);
+pub const TB_PROFILER_SCRIPT: &str = default_env(
+    option_env!("TB_PROFILER_SCRIPT"),
+    "/shares/sander.imm.uzh/MM/PRJEB57919/scripts/tbprofiler.sh",
+);
+pub const REMOTE_RESULTS_DIR: &str = default_env(
+    option_env!("REMOTE_RESULTS_DIR"),
+    "/shares/sander.imm.uzh/MM/PRJEB57919/out/results",
+);
+pub const DEFAULT_TEMPLATE_REMOTE: &str = default_env(
+    option_env!("DEFAULT_TEMPLATE_REMOTE"),
+    "/shares/sander.imm.uzh/MM/PRJEB57919/tb-profiler-templates/docx/default_template.docx",
+);
+pub const USER_TEMPLATE_REMOTE: &str = default_env(
+    option_env!("USER_TEMPLATE_REMOTE"),
+    "/shares/sander.imm.uzh/MM/PRJEB57919/template/user_template.docx",
+);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TbguiConfig {

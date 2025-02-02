@@ -41,8 +41,8 @@ impl Tbgui {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match self {
             Tbgui::Loading => {
-                match message {
-                    Message::Loaded(result) => match result {
+                if let Message::Loaded(result) = message {
+                    match result {
                         Ok(state) => {
                             *self = Tbgui::Loaded(State {
                                 config: state,
@@ -53,8 +53,7 @@ impl Tbgui {
                             log_error(&e);
                             *self = Tbgui::Loaded(State::default());
                         }
-                    },
-                    _ => {}
+                    }
                 }
                 Task::done(Message::CreateClient)
             }
