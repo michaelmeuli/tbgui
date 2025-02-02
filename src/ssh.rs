@@ -191,11 +191,7 @@ pub async fn download_default_template(
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
-    if let Err(e) = download_file(&sftp, remote_file_path, &local_file_path).await {
-        println!("Error downloading file: {:?}", e);
-    } else {
-        println!("File successfully downloaded to: {:?}", local_file_path);
-    }
+    download_file(&sftp, remote_file_path, &local_file_path).await?;
     Ok(())
 }
 
@@ -218,8 +214,7 @@ pub async fn upload_user_template(
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
-    if let Err(e) = client.upload_file(local_file_path, remote_file_path).await {
-        println!("Error uploading file: {:?}", e);
-    }
+    println!("Uploading file to: {:?}", remote_file_path);
+    client.upload_file(local_file_path, remote_file_path).await?;
     Ok(())
 }

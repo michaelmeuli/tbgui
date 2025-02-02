@@ -194,7 +194,6 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
         .size(16)
         .align_x(Left);
     let user_template = column![user_template_text, user_template_input].spacing(10);
-    //user_template_remote
 
     let content = column![
         title,
