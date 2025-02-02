@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Primitive"],"mod":["window"],"struct":["Layer","Renderer","Settings"]};

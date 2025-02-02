@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_client","delete_results","download_default_template","download_results","get_raw_reads","run_tbprofiler","upload_user_template"]};
