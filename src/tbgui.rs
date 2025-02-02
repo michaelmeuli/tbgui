@@ -53,7 +53,7 @@ impl Tbgui {
                             log_error(&e);
                             *self = Tbgui::Loaded(State::default());
                         }
-                    }
+                    },
                     _ => {}
                 }
                 Task::done(Message::CreateClient)
@@ -69,37 +69,69 @@ impl Tbgui {
                                     format!("{:?}", e)
                                 })
                             },
-                            Message::LoadRemoteState,
+                            Message::CreatedClient,
                         )
                     }
-                    Message::LoadRemoteState(result) => match result {
-                        Ok(client) => {
-                            state.client = Some(client);
-                            let client = state.client.clone();
-                            let config = state.config.clone();
-                            Task::perform(
-                                async move {
-                                    if let Some(client) = client {
-                                        get_raw_reads(&client, &config).await.map_err(|e| {
-                                            println!(
-                                                "Error returned from get_raw_reads(): {:?}",
-                                                e
-                                            );
-                                            format!("{:?}", e)
-                                        })
-                                    } else {
-                                        Err("Client is None".to_string())
-                                    }
-                                },
-                                Message::LoadedRemoteState,
-                            )
+                    Message::ReCreateClient => {
+                        let config = state.config.clone();
+                        Task::perform(
+                            async move {
+                                create_client(&config).await.map_err(|e| {
+                                    println!("Error returned from create_client(): {:?}", e);
+                                    format!("{:?}", e)
+                                })
+                            },
+                            Message::ReCreatedClient,
+                        )
+                    }
+                    Message::CreatedClient(result) => {
+                        match result {
+                            Ok(client) => {
+                                state.client = Some(client);
+                                state.info_view_message =
+                                    Some("Client created successfully".to_string());
+                            }
+                            Err(result) => {
+                                log_error(&result);
+                                state.error_view_message = Some(result);
+                                state.screen = Screen::Error;
+                            }
                         }
-                        Err(e) => {
-                            log_error(&e);
-                            state.error_message = Some(e);
-                            Task::none()
+                        Task::done(Message::LoadRemoteState)
+                    }
+                    Message::ReCreatedClient(result) => {
+                        match result {
+                            Ok(client) => {
+                                state.client = Some(client);
+                                state.info_view_message =
+                                    Some("Client created successfully".to_string());
+                                state.screen = Screen::Info;
+                            }
+                            Err(result) => {
+                                log_error(&result);
+                                state.error_view_message = Some(result);
+                                state.screen = Screen::Error;
+                            }
                         }
-                    },
+                        Task::done(Message::LoadRemoteState)
+                    }
+                    Message::LoadRemoteState => {
+                        let client = state.client.clone();
+                        let config = state.config.clone();
+                        Task::perform(
+                            async move {
+                                if let Some(client) = client {
+                                    get_raw_reads(&client, &config).await.map_err(|e| {
+                                        println!("Error returned from get_raw_reads(): {:?}", e);
+                                        format!("{:?}", e)
+                                    })
+                                } else {
+                                    Err("Client is None".to_string())
+                                }
+                            },
+                            Message::LoadedRemoteState,
+                        )
+                    }
                     Message::ReloadRemoteState => {
                         state.error_message = None;
                         let client = state.client.clone();
@@ -316,7 +348,7 @@ impl Tbgui {
                             ..state.config.clone()
                         };
                         confy::store("tbgui", None, &config).unwrap();
-                        Task::none()
+                        Task::done(Message::ReCreateClient)
                     }
 
                     Message::ConfigRawDirChanged(remote_raw_dir) => {

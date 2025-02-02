@@ -183,11 +183,11 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
             .align_x(Left);
     let default_template = column![default_template_text, default_template_input].spacing(10);
 
-    let user_template_text = text("Default template remote:")
+    let user_template_text = text("User template remote:")
         .width(Fill)
         .size(16)
         .align_x(Left);
-    let user_template_input = text_input("Default template remote", &config.user_template_remote)
+    let user_template_input = text_input("User template remote", &config.user_template_remote)
         .on_input(Message::ConfigUserTemplateChanged)
         .on_submit(Message::ConfigUserTemplateSubmitted)
         .padding(5)
