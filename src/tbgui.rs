@@ -246,7 +246,6 @@ impl Tbgui {
                             Message::DeletedResults,
                         )
                     }
-
                     Message::SettingsPressed => {
                         state.screen = Screen::Settings;
                         Task::none()
@@ -336,7 +335,6 @@ impl Tbgui {
                         state.screen = Screen::Config;
                         Task::none()
                     }
-
                     Message::ConfigNameChanged(username) => {
                         state.config.username = username;
                         Task::none()
@@ -349,7 +347,6 @@ impl Tbgui {
                         confy::store("tbgui", None, &config).unwrap();
                         Task::done(Message::ReCreateClient)
                     }
-
                     Message::ConfigRawDirChanged(remote_raw_dir) => {
                         state.config.remote_raw_dir = remote_raw_dir;
                         Task::none()
@@ -362,7 +359,6 @@ impl Tbgui {
                         confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-
                     Message::ConfigScriptPathChanged(tb_profiler_script) => {
                         state.config.tb_profiler_script = tb_profiler_script;
                         Task::none()
@@ -375,7 +371,6 @@ impl Tbgui {
                         confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-
                     Message::ConfigResultsPathChanged(remote_results_dir) => {
                         state.config.remote_results_dir = remote_results_dir;
                         Task::none()
@@ -388,7 +383,6 @@ impl Tbgui {
                         confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-
                     Message::ConfigDefaultTemplateChanged(default_template_remote) => {
                         state.config.default_template_remote = default_template_remote;
                         Task::none()
@@ -401,7 +395,6 @@ impl Tbgui {
                         confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-
                     Message::ConfigUserTemplateChanged(user_template_remote) => {
                         state.config.user_template_remote = user_template_remote;
                         Task::none()
@@ -444,7 +437,6 @@ impl Tbgui {
                             },
                         )
                     }
-
                     Message::CheckIfRunningCompleted(is_running) => {
                         state.is_running = is_running;
                         Task::none()
