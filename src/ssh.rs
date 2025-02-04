@@ -140,13 +140,10 @@ pub async fn delete_results(
     let command_rm = format!("rm {}/*", config.remote_results_dir.as_str());
     let commandexecutedresult_rm = client.execute(&command_rm).await?;
     if commandexecutedresult_rm.exit_status != 0 {
-        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!(
-                "Failed to delete files on remote: {:?}",
-                commandexecutedresult_rm
-            ),
-        )));
+        println!(
+            "Remote directory may be emmpty. Failed to delete files on remote: {:?}",
+            commandexecutedresult_rm
+        );
     }
     let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !directory.is_dir() {
