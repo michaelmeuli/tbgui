@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AgentAuthError","ChannelMsg","ChannelOpenFailure","Disconnect","Error","Pty","Sig","SshId"],"mod":["cipher","client","compression","kex","mac","server"],"struct":["Channel","ChannelId","ChannelStream","CryptoVec","Limits","MethodSet","Preferred","SendError"],"trait":["Signer"]};

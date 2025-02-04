@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["empty_message","gear_button","loading_message","view_config","view_controls","view_error","view_home","view_info","view_settings"]};
