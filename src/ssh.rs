@@ -48,7 +48,6 @@ pub async fn get_raw_reads(
     let stdout = result.stdout;
 
     let raw_reads: Vec<String> = stdout.lines().map(String::from).collect();
-    println!("Raw reads: {:?}", raw_reads);
     let tasks = create_tasks(raw_reads);
     Ok(RemoteState { items: tasks })
 }
@@ -93,6 +92,10 @@ pub async fn download_results(
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
     let remote_dir = config.remote_results_dir.as_str();
+    let default_local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
+    if !default_local_dir.exists() {
+        create_dir_all(&default_local_dir).await?;
+    }
     let local_dir: Option<PathBuf> = FileDialog::new()
         .set_title("Select directory to download results")
         .set_directory(UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL))
@@ -127,12 +130,7 @@ pub async fn delete_results(
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
     let command_checkdir = format!("ls {}/", config.remote_results_dir.as_str());
-    println!("Running command_checkdir: {:?}", command_checkdir);
     let commandexecutedresult_checkdir = client.execute(&command_checkdir).await?;
-    println!(
-        "command_checkdir executed: {:?}",
-        commandexecutedresult_checkdir
-    );
     if commandexecutedresult_checkdir.exit_status != 0 {
         return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
             std::io::ErrorKind::NotFound,
@@ -140,12 +138,22 @@ pub async fn delete_results(
         )));
     }
     let command_rm = format!("rm {}/*", config.remote_results_dir.as_str());
-    println!("Running command_rm: {}", command_rm);
     let commandexecutedresult_rm = client.execute(&command_rm).await?;
-    println!("command_rm executed: {:?}", commandexecutedresult_rm);
+    if commandexecutedresult_rm.exit_status != 0 {
+        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!(
+                "Failed to delete files on remote: {:?}",
+                commandexecutedresult_rm
+            ),
+        )));
+    }
     let directory = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !directory.is_dir() {
-        println!("Directory does not exist: {:?}", directory);
+        println!(
+            "Directory {RESULT_DIR_LOCAL} does not exist in local home directory: {:?}",
+            directory
+        );
         return Ok(());
     }
     for entry in fs::read_dir(&directory)? {
@@ -153,10 +161,8 @@ pub async fn delete_results(
         let path = entry.path();
         if path.is_file() {
             fs::remove_file(&path)?;
-            println!("Deleted file: {:?}", path);
         }
     }
-    println!("All files in {:?} have been deleted.", directory);
     Ok(())
 }
 
@@ -220,7 +226,8 @@ pub async fn upload_user_template(
 
     let channel = client.get_channel().await?;
     channel.request_subsystem(true, "sftp").await?;
-    println!("Uploading file to: {:?}", remote_file_path);
-    client.upload_file(local_file_path, remote_file_path).await?;
+    client
+        .upload_file(local_file_path, remote_file_path)
+        .await?;
     Ok(())
 }
