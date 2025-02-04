@@ -277,6 +277,7 @@ fn view_controls(items: &[Item], current_filter: Filter) -> Element<Message> {
     };
 
     row![
+        button("Reload").on_press(Message::ReloadRemoteState),
         text!(
             "{items_checked} {} selected",
             if items_checked == 1 { "item" } else { "items" }

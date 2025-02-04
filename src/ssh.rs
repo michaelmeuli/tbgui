@@ -45,10 +45,10 @@ pub async fn get_raw_reads(
             format!("Failed to list files in remote directory: {:?}", e),
         ))
     })?;
-    assert_eq!(result.exit_status, 0);
     let stdout = result.stdout;
 
     let raw_reads: Vec<String> = stdout.lines().map(String::from).collect();
+    println!("Raw reads: {:?}", raw_reads);
     let tasks = create_tasks(raw_reads);
     Ok(RemoteState { items: tasks })
 }
@@ -59,6 +59,12 @@ pub async fn run_tbprofiler(
     samples: String,
     config: &TbguiConfig,
 ) -> Result<String, async_ssh2_tokio::Error> {
+    if items_checked == 0 {
+        return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Cannot run tbprofiler with zero items checked",
+        )));
+    }
     let command_run_tbprofiler = format!(
         "sbatch --array 0-{} {} \"{}\"",
         items_checked - 1,

@@ -251,7 +251,7 @@ impl Tbgui {
                     }
                     Message::HomePressed => {
                         state.screen = Screen::Home;
-                        Task::done(Message::ReloadRemoteState)
+                        Task::none()
                     }
                     Message::DownloadDefaultTemplate => {
                         let client = state.client.clone();
