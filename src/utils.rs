@@ -98,17 +98,21 @@ pub async fn check_if_dir_exists(
         Ok(())
     }
 }
+
 pub fn log_error(message: &str) {
-    let error_file = UserDirs::new()
-        .unwrap()
+    let log_dir = UserDirs::new()
+        .expect("Failed to get user directories")
         .home_dir()
-        .join(RESULT_DIR_LOCAL)
-        .join("error.log");
+        .join(RESULT_DIR_LOCAL);
+    if !log_dir.exists() {
+        std::fs::create_dir_all(&log_dir).expect("Failed to create RESULT_DIR_LOCAL");
+    }
+    let error_file = log_dir.join("error.log");
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(error_file)
-        .expect("Failed to open log file");
+        .open(&error_file)
+        .expect("Failed to open or create log file");
     writeln!(file, "{}", message).expect("Failed to write to log file");
 }
 
