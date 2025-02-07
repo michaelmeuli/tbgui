@@ -87,12 +87,15 @@ impl Tbgui {
                         match result {
                             Ok(client) => {
                                 state.client = Some(client);
+                                state.error_message = None;
                                 state.info_view_message =
                                     Some("Client created successfully".to_string());
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                state.client = None;
+                                state.error_message = Some(e.clone());
+                                state.error_view_message = Some(e.clone());
+                                log_error(&e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -102,13 +105,16 @@ impl Tbgui {
                         match result {
                             Ok(client) => {
                                 state.client = Some(client);
+                                state.error_message = None;
                                 state.info_view_message =
                                     Some("Client created successfully".to_string());
                                 state.screen = Screen::Info;
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                state.client = None;
+                                state.error_message = Some(e.clone());
+                                state.error_view_message = Some(e.clone());
+                                log_error(&e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -132,6 +138,7 @@ impl Tbgui {
                         )
                     }
                     Message::ReloadRemoteState => {
+                        println!("Reloading remote state");
                         state.error_message = None;
                         let client = state.client.clone();
                         let config = state.config.clone();
