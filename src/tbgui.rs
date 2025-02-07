@@ -60,6 +60,9 @@ impl Tbgui {
             Tbgui::Loaded(state) => {
                 let command = match message {
                     Message::CreateClient => {
+                        state.error_message = Some("Connecting".to_string());
+                        state.info_view_message = Some("Connecting".to_string());
+                        state.screen = Screen::Home;
                         let config = state.config.clone();
                         Task::perform(
                             async move {
@@ -72,6 +75,9 @@ impl Tbgui {
                         )
                     }
                     Message::ReCreateClient => {
+                        state.error_message = Some("Connecting".to_string());
+                        state.info_view_message = Some("Connecting".to_string());
+                        state.screen = Screen::Home;
                         let config = state.config.clone();
                         Task::perform(
                             async move {
@@ -87,7 +93,8 @@ impl Tbgui {
                         match result {
                             Ok(client) => {
                                 state.client = Some(client);
-                                state.error_message = None;
+                                state.error_message =
+                                    Some("Client created successfully".to_string());
                                 state.info_view_message =
                                     Some("Client created successfully".to_string());
                             }
@@ -105,10 +112,10 @@ impl Tbgui {
                         match result {
                             Ok(client) => {
                                 state.client = Some(client);
-                                state.error_message = None;
+                                state.error_message =
+                                    Some("Client created successfully".to_string());
                                 state.info_view_message =
                                     Some("Client created successfully".to_string());
-                                state.screen = Screen::Info;
                             }
                             Err(e) => {
                                 state.client = None;
@@ -138,8 +145,6 @@ impl Tbgui {
                         )
                     }
                     Message::ReloadRemoteState => {
-                        println!("Reloading remote state");
-                        state.error_message = None;
                         let client = state.client.clone();
                         let config = state.config.clone();
                         Task::perform(
@@ -156,17 +161,21 @@ impl Tbgui {
                             Message::LoadedRemoteState,
                         )
                     }
-                    Message::LoadedRemoteState(result) => match result {
-                        Ok(remote_state) => {
-                            state.items = remote_state.items;
-                            Task::none()
+                    Message::LoadedRemoteState(result) => {
+                        state.error_message = None;
+                        match result {
+                            Ok(remote_state) => {
+                                state.items = remote_state.items;
+                                Task::none()
+                            }
+                            Err(e) => {
+                                log_error(&e);
+                                state.error_message = Some(e);
+                                Task::none()
+                            }
                         }
-                        Err(e) => {
-                            log_error(&e);
-                            state.error_message = Some(e);
-                            Task::none()
-                        }
-                    },
+                    }
+
                     Message::FilterChanged(filter) => {
                         state.filter = filter;
                         Task::none()
@@ -284,9 +293,12 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     upload_user_template(&client, &config).await.map_err(|e| {
-                                            println!("Error returned from upload_user_template(): {:?}", e);
-                                            format!("{:?}", e)
-                                        })
+                                        println!(
+                                            "Error returned from upload_user_template(): {:?}",
+                                            e
+                                        );
+                                        format!("{:?}", e)
+                                    })
                                 } else {
                                     Err("Error uploading user template".to_string())
                                 }
