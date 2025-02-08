@@ -25,9 +25,7 @@ impl Tbgui {
         (
             Self::Loading,
             Task::perform(
-                cfg.map_err(|e| {
-                    format!("Error loading config: {:?}", e)
-                }),
+                cfg.map_err(|e| format!("Error loading config: {:?}", e)),
                 Message::Loaded,
             ),
         )
@@ -162,9 +160,7 @@ impl Tbgui {
                                 if let Some(client) = client {
                                     run_tbprofiler(&client, items_checked, samples, &config)
                                         .await
-                                        .map_err(|e| {
-                                            format!("Error running tbprofiler: {:?}", e)
-                                        })
+                                        .map_err(|e| format!("Error running tbprofiler: {:?}", e))
                                 } else {
                                     Err("Client is None".to_string())
                                 }
@@ -235,7 +231,10 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     upload_user_template(&client, &config).await.map_err(|e| {
-                                        format!("Error returned from upload_user_template(): {:?}", e)
+                                        format!(
+                                            "Error returned from upload_user_template(): {:?}",
+                                            e
+                                        )
                                     })
                                 } else {
                                     Err("Client is None".to_string())

@@ -120,9 +120,10 @@ pub fn delete_log_file() {
         .home_dir()
         .join(RESULT_DIR_LOCAL)
         .join("error.log");
-    if error_file.exists() {
-        if fs::remove_file(&error_file).is_err() {
-            log_error(&format!("Failed to delete error log file: {:?}", error_file));
-        }
-    } 
+    if error_file.exists() && fs::remove_file(&error_file).is_err() {
+        log_error(&format!(
+            "Failed to delete error log file: {:?}",
+            error_file
+        ));
+    }
 }
