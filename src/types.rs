@@ -22,9 +22,7 @@ pub struct State {
 pub enum Message {
     Loaded(Result<TbguiConfig, String>),
     CreateClient,
-    ReCreateClient,
     CreatedClient(Result<Client, String>),
-    ReCreatedClient(Result<Client, String>),
     LoadRemoteState,
     LoadedRemoteState(Result<RemoteState, String>),
     ReloadRemoteState,

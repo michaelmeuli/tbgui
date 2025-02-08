@@ -74,41 +74,7 @@ impl Tbgui {
                             Message::CreatedClient,
                         )
                     }
-                    Message::ReCreateClient => {
-                        state.error_message = Some("Connecting".to_string());
-                        state.info_view_message = Some("Connecting".to_string());
-                        state.screen = Screen::Home;
-                        let config = state.config.clone();
-                        Task::perform(
-                            async move {
-                                create_client(&config).await.map_err(|e| {
-                                    println!("Error returned from create_client(): {:?}", e);
-                                    format!("{:?}", e)
-                                })
-                            },
-                            Message::ReCreatedClient,
-                        )
-                    }
                     Message::CreatedClient(result) => {
-                        match result {
-                            Ok(client) => {
-                                state.client = Some(client);
-                                state.error_message =
-                                    Some("Client created successfully".to_string());
-                                state.info_view_message =
-                                    Some("Client created successfully".to_string());
-                            }
-                            Err(e) => {
-                                state.client = None;
-                                state.error_message = Some(e.clone());
-                                state.error_view_message = Some(e.clone());
-                                log_error(&e);
-                                state.screen = Screen::Error;
-                            }
-                        }
-                        Task::done(Message::LoadRemoteState)
-                    }
-                    Message::ReCreatedClient(result) => {
                         match result {
                             Ok(client) => {
                                 state.client = Some(client);
@@ -396,7 +362,7 @@ impl Tbgui {
                             ..state.config.clone()
                         };
                         confy::store("tbgui", None, &config).unwrap();
-                        Task::done(Message::ReCreateClient)
+                        Task::done(Message::CreateClient)
                     }
                     Message::ConfigRawDirChanged(remote_raw_dir) => {
                         state.config.remote_raw_dir = remote_raw_dir;
