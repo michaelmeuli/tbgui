@@ -251,9 +251,9 @@ impl Tbgui {
                                     Some(format!("Batch started successfully: {}", result));
                                 state.screen = Screen::Info;
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                log_error(&e);
+                                state.error_view_message = Some(e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -267,9 +267,9 @@ impl Tbgui {
                                     Some("Results downloaded successfully".to_string());
                                 state.screen = Screen::Info;
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                log_error(&e);
+                                state.error_view_message = Some(e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -282,9 +282,9 @@ impl Tbgui {
                                     Some("Results deleted successfully".to_string());
                                 state.screen = Screen::Info;
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                log_error(&e);
+                                state.error_view_message = Some(e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -297,9 +297,9 @@ impl Tbgui {
                                     Some("Default template downloaded successfully".to_string());
                                 state.screen = Screen::Info;
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                log_error(&e);
+                                state.error_view_message = Some(e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -312,9 +312,9 @@ impl Tbgui {
                                     Some("User template uploaded successfully".to_string());
                                 state.screen = Screen::Info;
                             }
-                            Err(result) => {
-                                log_error(&result);
-                                state.error_view_message = Some(result);
+                            Err(e) => {
+                                log_error(&e);
+                                state.error_view_message = Some(e);
                                 state.screen = Screen::Error;
                             }
                         }
@@ -408,18 +408,17 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 if let Some(client) = client {
-                                    check_if_running(&client, &config).await
+                                    check_if_running(&client, &config).await.map_err(|e| {
+                                        format!("Error returned from check_if_running(): {:?}", e)
+                                    })
                                 } else {
-                                    Err(async_ssh2_tokio::Error::from(std::io::Error::new(
-                                        std::io::ErrorKind::Other,
-                                        "check_if_running(): Client is None",
-                                    )))
+                                    Err("Client is None".to_string())
                                 }
                             },
                             |result| match result {
                                 Ok(is_running) => Message::CheckIfRunningCompleted(is_running),
                                 Err(e) => {
-                                    println!("Error check_if_running(): {:?}", e);
+                                    log_error(&e);
                                     Message::CheckIfRunningCompleted(false)
                                 }
                             },
