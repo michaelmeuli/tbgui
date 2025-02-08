@@ -75,9 +75,9 @@ impl Tbgui {
                             Ok(client) => {
                                 state.client = Some(client);
                                 state.error_message =
-                                    Some("Client created successfully".to_string());
+                                    Some("Loading samples from remote".to_string());
                                 state.info_view_message =
-                                    Some("Client created successfully".to_string());
+                                    Some("Loading samples from remote".to_string());
                             }
                             Err(e) => {
                                 state.client = None;
