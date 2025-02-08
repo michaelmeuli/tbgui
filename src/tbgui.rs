@@ -26,8 +26,7 @@ impl Tbgui {
             Self::Loading,
             Task::perform(
                 cfg.map_err(|e| {
-                    println!("Error loading config: {:?}", e);
-                    format!("{:?}", e)
+                    format!("Error loading config: {:?}", e)
                 }),
                 Message::Loaded,
             ),
@@ -67,8 +66,7 @@ impl Tbgui {
                         Task::perform(
                             async move {
                                 create_client(&config).await.map_err(|e| {
-                                    println!("Error returned from create_client(): {:?}", e);
-                                    format!("{:?}", e)
+                                    format!("Error returned from create_client(): {:?}", e)
                                 })
                             },
                             Message::CreatedClient,
@@ -101,8 +99,7 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     get_raw_reads(&client, &config).await.map_err(|e| {
-                                        println!("Error returned from get_raw_reads(): {:?}", e);
-                                        format!("{:?}", e)
+                                        format!("Error returned from get_raw_reads(): {:?}", e)
                                     })
                                 } else {
                                     Err("Client is None".to_string())
@@ -158,7 +155,6 @@ impl Tbgui {
                             .map(|item| item.sample.clone())
                             .collect::<Vec<String>>()
                             .join(",");
-                        println!("Running TB-Profiler for samples: {}", samples);
                         let client = state.client.clone();
                         let config = state.config.clone();
                         Task::perform(
@@ -167,14 +163,13 @@ impl Tbgui {
                                     run_tbprofiler(&client, items_checked, samples, &config)
                                         .await
                                         .map_err(|e| {
-                                            println!("Error running tbprofiler: {:?}", e);
-                                            format!("{:?}", e)
+                                            format!("Error running tbprofiler: {:?}", e)
                                         })
                                 } else {
                                     Err("Client is None".to_string())
                                 }
                             },
-                            Message::ProfilerRunCompleted,
+                            Message::ProfilerRunStarted,
                         )
                     }
                     Message::DownloadResults => {
@@ -184,8 +179,7 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     download_results(&client, &config).await.map_err(|e| {
-                                        println!("Error returned from download_results(): {:?}", e);
-                                        format!("{:?}", e)
+                                        format!("Error returned from download_results(): {:?}", e)
                                     })
                                 } else {
                                     Err("Client is None".to_string())
@@ -201,8 +195,7 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     delete_results(&client, &config).await.map_err(|e| {
-                                        println!("Error returned from delete_results(): {:?}", e);
-                                        format!("{:?}", e)
+                                        format!("Error returned from delete_results(): {:?}", e)
                                     })
                                 } else {
                                     Err("Client is None".to_string())
@@ -226,11 +219,10 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     download_default_template(&client, &config).await.map_err(|e| {
-                                            println!("Error returned from download_default_template(): {:?}", e);
-                                            format!("{:?}", e)
+                                            format!("Error returned from download_default_template(): {:?}", e)
                                         })
                                 } else {
-                                    Err("Error downloading default template".to_string())
+                                    Err("Client is None".to_string())
                                 }
                             },
                             Message::DownloadedDefaultTemplate,
@@ -243,20 +235,16 @@ impl Tbgui {
                             async move {
                                 if let Some(client) = client {
                                     upload_user_template(&client, &config).await.map_err(|e| {
-                                        println!(
-                                            "Error returned from upload_user_template(): {:?}",
-                                            e
-                                        );
-                                        format!("{:?}", e)
+                                        format!("Error returned from upload_user_template(): {:?}", e)
                                     })
                                 } else {
-                                    Err("Error uploading user template".to_string())
+                                    Err("Client is None".to_string())
                                 }
                             },
                             Message::UploadedUserTemplate,
                         )
                     }
-                    Message::ProfilerRunCompleted(result) => {
+                    Message::ProfilerRunStarted(result) => {
                         match result {
                             Ok(result) => {
                                 state.info_view_message =
