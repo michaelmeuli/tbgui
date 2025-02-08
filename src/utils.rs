@@ -19,7 +19,6 @@ pub async fn download_file(
     remote_file_path: &str,
     local_file_path: &PathBuf,
 ) -> Result<(), async_ssh2_tokio::Error> {
-    println!("Downloading: {}", remote_file_path);
     let mut remote_file = sftp
         .open_with_flags(remote_file_path, OpenFlags::READ)
         .await?;
@@ -36,7 +35,6 @@ pub async fn download_file(
         }
         local_file.write_all(&buffer[..n]).await?;
     }
-    println!("File downloaded successfully to {:?}", local_file_path);
     Ok(())
 }
 
@@ -122,13 +120,9 @@ pub fn delete_log_file() {
         .home_dir()
         .join(RESULT_DIR_LOCAL)
         .join("error.log");
-    println!("Attempting to delete: {:?}", error_file);
-    if fs::remove_file(&error_file).is_ok() {
-        println!("File {:?} deleted successfully.", error_file);
-    } else {
-        println!(
-            "Failed to delete the file {:?}. It may not exist.",
-            error_file
-        );
-    }
+    if error_file.exists() {
+        if fs::remove_file(&error_file).is_err() {
+            log_error(&format!("Failed to delete error log file: {:?}", error_file));
+        }
+    } 
 }
