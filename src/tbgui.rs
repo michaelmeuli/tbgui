@@ -94,6 +94,7 @@ impl Tbgui {
                         Task::done(Message::LoadRemoteState)
                     }
                     Message::LoadRemoteState => {
+                        state.screen = Screen::Home;
                         let client = state.client.clone();
                         let config = state.config.clone();
                         Task::perform(
@@ -357,7 +358,7 @@ impl Tbgui {
                             ..state.config.clone()
                         };
                         confy::store("tbgui", None, &config).unwrap();
-                        Task::none()
+                        Task::done(Message::LoadRemoteState)
                     }
                     Message::ConfigScriptPathChanged(tb_profiler_script) => {
                         state.config.tb_profiler_script = tb_profiler_script;
