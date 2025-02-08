@@ -25,7 +25,6 @@ pub enum Message {
     CreatedClient(Result<Client, String>),
     LoadRemoteState,
     LoadedRemoteState(Result<RemoteState, String>),
-    ReloadRemoteState,
     FilterChanged(Filter),
     Item(usize, ItemMessage),
     TabPressed { shift: bool },

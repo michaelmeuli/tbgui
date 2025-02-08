@@ -110,23 +110,6 @@ impl Tbgui {
                             Message::LoadedRemoteState,
                         )
                     }
-                    Message::ReloadRemoteState => {
-                        let client = state.client.clone();
-                        let config = state.config.clone();
-                        Task::perform(
-                            async move {
-                                if let Some(client) = client {
-                                    get_raw_reads(&client, &config).await.map_err(|e| {
-                                        println!("Error returned from get_raw_reads(): {:?}", e);
-                                        format!("{:?}", e)
-                                    })
-                                } else {
-                                    Err("Client is None".to_string())
-                                }
-                            },
-                            Message::LoadedRemoteState,
-                        )
-                    }
                     Message::LoadedRemoteState(result) => {
                         state.error_message = None;
                         match result {
