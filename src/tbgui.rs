@@ -95,13 +95,13 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     get_raw_reads(&client, &config).await.map_err(|e| {
                                         format!("Error returned from get_raw_reads(): {:?}", e)
                                     })
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             Message::LoadedRemoteState,
                         )
@@ -157,13 +157,13 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     run_tbprofiler(&client, items_checked, samples, &config)
                                         .await
                                         .map_err(|e| format!("Error running tbprofiler: {:?}", e))
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             Message::ProfilerRunStarted,
                         )
@@ -173,13 +173,13 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     download_results(&client, &config).await.map_err(|e| {
                                         format!("Error returned from download_results(): {:?}", e)
                                     })
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             Message::DownloadedResults,
                         )
@@ -189,13 +189,13 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     delete_results(&client, &config).await.map_err(|e| {
                                         format!("Error returned from delete_results(): {:?}", e)
                                     })
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             Message::DeletedResults,
                         )
@@ -213,13 +213,13 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     download_default_template(&client, &config).await.map_err(|e| {
                                             format!("Error returned from download_default_template(): {:?}", e)
                                         })
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             Message::DownloadedDefaultTemplate,
                         )
@@ -229,16 +229,16 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     upload_user_template(&client, &config).await.map_err(|e| {
                                         format!(
                                             "Error returned from upload_user_template(): {:?}",
                                             e
                                         )
                                     })
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             Message::UploadedUserTemplate,
                         )
@@ -406,13 +406,13 @@ impl Tbgui {
                         let config = state.config.clone();
                         Task::perform(
                             async move {
-                                if let Some(client) = client {
+                                match client { Some(client) => {
                                     check_if_running(&client, &config).await.map_err(|e| {
                                         format!("Error returned from check_if_running(): {:?}", e)
                                     })
-                                } else {
+                                } _ => {
                                     Err("Client is None".to_string())
-                                }
+                                }}
                             },
                             |result| match result {
                                 Ok(is_running) => Message::CheckIfRunningCompleted(is_running),
