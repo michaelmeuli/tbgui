@@ -5,8 +5,8 @@ use crate::{DEFAULT_TEMPLATE_FILENAME_LOCAL, RESULT_DIR_LOCAL};
 use async_ssh2_tokio::client::{AuthMethod, Client, ServerCheckMethod};
 use directories_next::UserDirs;
 use rfd::FileDialog;
-use russh_sftp::client::fs::ReadDir;
 use russh_sftp::client::SftpSession;
+use russh_sftp::client::fs::ReadDir;
 use std::fs;
 use std::path::PathBuf;
 use tokio::fs::create_dir_all;
@@ -106,7 +106,7 @@ pub async fn download_results(
             return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 "No directory selected",
-            )))
+            )));
         }
     };
     check_if_dir_exists(client, remote_dir).await?;

@@ -2,7 +2,7 @@ use crate::config::TbguiConfig;
 use crate::types::{Filter, Item, Message};
 use iced::alignment::Horizontal::Left;
 use iced::widget::{
-    button, center, column, container, keyed_column, row, scrollable, svg, text, text_input, Space,
+    Space, button, center, column, container, keyed_column, row, scrollable, svg, text, text_input,
 };
 use iced::{Center, Element, Fill};
 
