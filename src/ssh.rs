@@ -10,6 +10,7 @@ use russh_sftp::client::fs::ReadDir;
 use std::fs;
 use std::path::PathBuf;
 use tokio::fs::create_dir_all;
+use serde_json::json;
 
 pub async fn create_client(config: &TbguiConfig) -> Result<Client, async_ssh2_tokio::Error> {
     let key_path = UserDirs::new()
@@ -64,11 +65,13 @@ pub async fn run_tbprofiler(
             "Cannot run tbprofiler with zero items checked",
         )));
     }
+    let json_payload = json!(config).to_string();
     let command_run_tbprofiler = format!(
-        "sbatch --array 0-{} {} \"{}\"",
+        "sbatch --array 0-{} {} \"{}\" {}",
         items_checked - 1,
         config.tb_profiler_script.as_str(),
-        samples
+        samples,
+        json_payload
     );
     let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
     if commandexecutedresult_run_tbprofiler.exit_status != 0 {
