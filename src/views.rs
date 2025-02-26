@@ -162,7 +162,7 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
         .width(Fill)
         .size(16)
         .align_x(Left);
-    let results_input = text_input("Remote results dir", &config.remote_results_dir)
+    let results_input = text_input("Remote results dir", &config.remote_out_dir)
         .on_input(Message::ConfigResultsPathChanged)
         .on_submit(Message::ConfigResultsPathSubmitted)
         .padding(5)

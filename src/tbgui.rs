@@ -369,13 +369,13 @@ impl Tbgui {
                         confy::store("tbgui", None, &config).unwrap();
                         Task::none()
                     }
-                    Message::ConfigResultsPathChanged(remote_results_dir) => {
-                        state.config.remote_results_dir = remote_results_dir;
+                    Message::ConfigResultsPathChanged(remote_out_dir) => {
+                        state.config.remote_out_dir = remote_out_dir;
                         Task::none()
                     }
                     Message::ConfigResultsPathSubmitted => {
                         let config = TbguiConfig {
-                            remote_results_dir: state.config.remote_results_dir.clone(),
+                            remote_out_dir: state.config.remote_out_dir.clone(),
                             ..state.config.clone()
                         };
                         confy::store("tbgui", None, &config).unwrap();

@@ -65,10 +65,13 @@ pub async fn run_tbprofiler(
         )));
     }
     let command_run_tbprofiler = format!(
-        "sbatch --array 0-{} {} \"{}\"",
+        "sbatch --array 0-{} {} \"{}\" {} {} {}",
         items_checked - 1,
         config.tb_profiler_script.as_str(),
-        samples
+        samples,
+        config.remote_raw_dir.as_str(),
+        config.remote_out_dir.as_str(), 
+        config.user_template_remote.as_str(),
     );
     let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
     if commandexecutedresult_run_tbprofiler.exit_status != 0 {
@@ -91,7 +94,9 @@ pub async fn download_results(
     channel.request_subsystem(true, "sftp").await?;
     let sftp = SftpSession::new(channel.into_stream()).await?;
 
-    let remote_dir = config.remote_results_dir.as_str();
+    let remote_dir = format!("{}/results", config.remote_out_dir);
+    let remote_dir: &str = remote_dir.as_str();
+    println!("Downloading results from remote directory: {:?}", remote_dir);
     let default_local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !default_local_dir.exists() {
         create_dir_all(&default_local_dir).await?;
@@ -129,15 +134,15 @@ pub async fn delete_results(
     client: &Client,
     config: &TbguiConfig,
 ) -> Result<(), async_ssh2_tokio::Error> {
-    let command_checkdir = format!("ls {}/", config.remote_results_dir.as_str());
+    let command_checkdir = format!("ls {}", config.remote_out_dir.as_str());
     let commandexecutedresult_checkdir = client.execute(&command_checkdir).await?;
     if commandexecutedresult_checkdir.exit_status != 0 {
         return Err(async_ssh2_tokio::Error::from(std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            format!("No such directory: {:?}", config.remote_results_dir),
+            format!("No such directory: {:?}", config.remote_out_dir),
         )));
     }
-    let command_rm = format!("rm {}/*", config.remote_results_dir.as_str());
+    let command_rm = format!("rm -rf {}/*", config.remote_out_dir.as_str());
     let commandexecutedresult_rm = client.execute(&command_rm).await?;
     if commandexecutedresult_rm.exit_status != 0 {
         println!(
