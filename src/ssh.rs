@@ -70,7 +70,7 @@ pub async fn run_tbprofiler(
         config.tb_profiler_script.as_str(),
         samples,
         config.remote_raw_dir.as_str(),
-        config.remote_out_dir.as_str(), 
+        config.remote_out_dir.as_str(),
         config.user_template_remote.as_str(),
     );
     let commandexecutedresult_run_tbprofiler = client.execute(&command_run_tbprofiler).await?;
@@ -96,7 +96,10 @@ pub async fn download_results(
 
     let remote_dir = format!("{}/results", config.remote_out_dir);
     let remote_dir: &str = remote_dir.as_str();
-    println!("Downloading results from remote directory: {:?}", remote_dir);
+    println!(
+        "Downloading results from remote directory: {:?}",
+        remote_dir
+    );
     let default_local_dir = UserDirs::new().unwrap().home_dir().join(RESULT_DIR_LOCAL);
     if !default_local_dir.exists() {
         create_dir_all(&default_local_dir).await?;
