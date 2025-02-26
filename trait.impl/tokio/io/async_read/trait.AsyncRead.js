@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["russh",[["impl&lt;S&gt; <a class=\"trait\" href=\"tokio/io/async_read/trait.AsyncRead.html\" title=\"trait tokio::io::async_read::AsyncRead\">AsyncRead</a> for <a class=\"struct\" href=\"russh/struct.ChannelStream.html\" title=\"struct russh::ChannelStream\">ChannelStream</a>&lt;S&gt;<div class=\"where\">where\n    S: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.85.0/core/convert/trait.From.html\" title=\"trait core::convert::From\">From</a>&lt;(<a class=\"struct\" href=\"russh/struct.ChannelId.html\" title=\"struct russh::ChannelId\">ChannelId</a>, <a class=\"enum\" href=\"russh/enum.ChannelMsg.html\" title=\"enum russh::ChannelMsg\">ChannelMsg</a>)&gt;,</div>"]]],["russh_sftp",[["impl <a class=\"trait\" href=\"tokio/io/async_read/trait.AsyncRead.html\" title=\"trait tokio::io::async_read::AsyncRead\">AsyncRead</a> for <a class=\"struct\" href=\"russh_sftp/client/fs/struct.File.html\" title=\"struct russh_sftp::client::fs::File\">File</a>"]]],["tokio",[]],["tokio_util",[["impl&lt;L, R&gt; <a class=\"trait\" href=\"tokio/io/async_read/trait.AsyncRead.html\" title=\"trait tokio::io::async_read::AsyncRead\">AsyncRead</a> for <a class=\"enum\" href=\"tokio_util/either/enum.Either.html\" title=\"enum tokio_util::either::Either\">Either</a>&lt;L, R&gt;<div class=\"where\">where\n    L: <a class=\"trait\" href=\"tokio/io/async_read/trait.AsyncRead.html\" title=\"trait tokio::io::async_read::AsyncRead\">AsyncRead</a>,\n    R: <a class=\"trait\" href=\"tokio/io/async_read/trait.AsyncRead.html\" title=\"trait tokio::io::async_read::AsyncRead\">AsyncRead</a>,</div>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[684,284,13,615]}
