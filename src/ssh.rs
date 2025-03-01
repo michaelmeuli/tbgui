@@ -145,7 +145,7 @@ pub async fn delete_results(
             format!("No such directory: {:?}", config.remote_out_dir),
         )));
     }
-    let command_rm = format!("rm -rf {}/*", config.remote_out_dir.as_str());
+    let command_rm = format!("rm -rf {}", config.remote_out_dir.as_str());
     let commandexecutedresult_rm = client.execute(&command_rm).await?;
     if commandexecutedresult_rm.exit_status != 0 {
         println!(
