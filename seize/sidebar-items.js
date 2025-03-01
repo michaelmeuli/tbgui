@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["reclaim"],"struct":["Collector","Guard","Link","Linked"],"trait":["AsLink"]};

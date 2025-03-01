@@ -1,0 +1,597 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Server handler. Each client will have their own handler."><title>Handler in russh::server - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-46132b98.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="russh" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0 (4d91de4e4 2025-02-17)" data-channel="1.85.0" data-search-js="search-75f5ac3e.js" data-settings-js="settings-0f613d39.js" ><script src="../../static.files/storage-59e33391.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../russh/index.html">russh</a><span class="version">0.45.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Handler</a></h2><h3><a href="#required-associated-types">Required Associated Types</a></h3><ul class="block"><li><a href="#associatedtype.Error" title="Error">Error</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.adjust_window" title="adjust_window">adjust_window</a></li><li><a href="#method.agent_request" title="agent_request">agent_request</a></li><li><a href="#method.auth_keyboard_interactive" title="auth_keyboard_interactive">auth_keyboard_interactive</a></li><li><a href="#method.auth_none" title="auth_none">auth_none</a></li><li><a href="#method.auth_password" title="auth_password">auth_password</a></li><li><a href="#method.auth_publickey" title="auth_publickey">auth_publickey</a></li><li><a href="#method.auth_publickey_offered" title="auth_publickey_offered">auth_publickey_offered</a></li><li><a href="#method.auth_succeeded" title="auth_succeeded">auth_succeeded</a></li><li><a href="#method.cancel_tcpip_forward" title="cancel_tcpip_forward">cancel_tcpip_forward</a></li><li><a href="#method.channel_close" title="channel_close">channel_close</a></li><li><a href="#method.channel_eof" title="channel_eof">channel_eof</a></li><li><a href="#method.channel_open_confirmation" title="channel_open_confirmation">channel_open_confirmation</a></li><li><a href="#method.channel_open_direct_tcpip" title="channel_open_direct_tcpip">channel_open_direct_tcpip</a></li><li><a href="#method.channel_open_forwarded_tcpip" title="channel_open_forwarded_tcpip">channel_open_forwarded_tcpip</a></li><li><a href="#method.channel_open_session" title="channel_open_session">channel_open_session</a></li><li><a href="#method.channel_open_x11" title="channel_open_x11">channel_open_x11</a></li><li><a href="#method.data" title="data">data</a></li><li><a href="#method.env_request" title="env_request">env_request</a></li><li><a href="#method.exec_request" title="exec_request">exec_request</a></li><li><a href="#method.extended_data" title="extended_data">extended_data</a></li><li><a href="#method.pty_request" title="pty_request">pty_request</a></li><li><a href="#method.shell_request" title="shell_request">shell_request</a></li><li><a href="#method.signal" title="signal">signal</a></li><li><a href="#method.subsystem_request" title="subsystem_request">subsystem_request</a></li><li><a href="#method.tcpip_forward" title="tcpip_forward">tcpip_forward</a></li><li><a href="#method.window_adjusted" title="window_adjusted">window_adjusted</a></li><li><a href="#method.window_change_request" title="window_change_request">window_change_request</a></li><li><a href="#method.x11_request" title="x11_request">x11_request</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In russh::<wbr>server</a></h2></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><span class="rustdoc-breadcrumbs"><a href="../index.html">russh</a>::<wbr><a href="index.html">server</a></span><h1>Trait <span class="trait">Handler</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/russh/server/mod.rs.html#174-526">Source</a> </span></div><pre class="rust item-decl"><code>pub trait Handler: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> {
+    type <a href="#associatedtype.Error" class="associatedtype">Error</a>: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;<a class="enum" href="../enum.Error.html" title="enum russh::Error">Error</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>;
+
+<details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 28 methods</span></summary>    // Provided methods
+    fn <a href="#method.auth_none" class="fn">auth_none</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.auth_password" class="fn">auth_password</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        password: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.auth_publickey_offered" class="fn">auth_publickey_offered</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        public_key: &amp;'life2 <a class="enum" href="../../russh_keys/key/enum.PublicKey.html" title="enum russh_keys::key::PublicKey">PublicKey</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.auth_publickey" class="fn">auth_publickey</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        public_key: &amp;'life2 <a class="enum" href="../../russh_keys/key/enum.PublicKey.html" title="enum russh_keys::key::PublicKey">PublicKey</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.auth_keyboard_interactive" class="fn">auth_keyboard_interactive</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        submethods: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        response: <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.Response.html" title="struct russh::server::Response">Response</a>&lt;'async_trait&gt;&gt;,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.auth_succeeded" class="fn">auth_succeeded</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_close" class="fn">channel_close</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_eof" class="fn">channel_eof</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_open_session" class="fn">channel_open_session</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_open_x11" class="fn">channel_open_x11</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+        originator_address: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        originator_port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_open_direct_tcpip" class="fn">channel_open_direct_tcpip</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+        host_to_connect: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        port_to_connect: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        originator_address: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        originator_port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait,
+             'life3: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_open_forwarded_tcpip" class="fn">channel_open_forwarded_tcpip</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+        host_to_connect: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        port_to_connect: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        originator_address: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        originator_port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait,
+             'life3: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.channel_open_confirmation" class="fn">channel_open_confirmation</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        id: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        max_packet_size: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        window_size: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.data" class="fn">data</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        data: &amp;'life1 [<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u8.html">u8</a>],
+        session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.extended_data" class="fn">extended_data</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        code: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        data: &amp;'life1 [<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u8.html">u8</a>],
+        session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.window_adjusted" class="fn">window_adjusted</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        new_size: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.adjust_window" class="fn">adjust_window</a>(&amp;mut self, channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>, current: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.pty_request" class="fn">pty_request</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        term: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        col_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        row_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        pix_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        pix_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        modes: &amp;'life2 [(<a class="enum" href="../enum.Pty.html" title="enum russh::Pty">Pty</a>, <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>)],
+        session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait,
+             'life3: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.x11_request" class="fn">x11_request</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        single_connection: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>,
+        x11_auth_protocol: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        x11_auth_cookie: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        x11_screen_number: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait,
+             'life3: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.env_request" class="fn">env_request</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        variable_name: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        variable_value: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait,
+             'life3: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.shell_request" class="fn">shell_request</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.exec_request" class="fn">exec_request</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        data: &amp;'life1 [<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u8.html">u8</a>],
+        session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.subsystem_request" class="fn">subsystem_request</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        name: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.window_change_request" class="fn">window_change_request</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        col_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        row_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        pix_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        pix_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.agent_request" class="fn">agent_request</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.signal" class="fn">signal</a>&lt;'life0, 'life1, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+        signal: <a class="enum" href="../enum.Sig.html" title="enum russh::Sig">Sig</a>,
+        session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.tcpip_forward" class="fn">tcpip_forward</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        address: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        port: &amp;'life2 mut <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait,
+             'life3: 'async_trait</span> { ... }
+<span class="item-spacer"></span>    fn <a href="#method.cancel_tcpip_forward" class="fn">cancel_tcpip_forward</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+        &amp;'life0 mut self,
+        address: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+        port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+        session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
+       <span class="where">where Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+             'life0: 'async_trait,
+             'life1: 'async_trait,
+             'life2: 'async_trait</span> { ... }
+</details>}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Server handler. Each client will have their own handler.</p>
+<p>Note: this is an <code>async_trait</code>. Click <code>[source]</code> on the right to see actual async function definitions.</p>
+</div></details><h2 id="required-associated-types" class="section-header">Required Associated Types<a href="#required-associated-types" class="anchor">§</a></h2><div class="methods"><section id="associatedtype.Error" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#175">Source</a><h4 class="code-header">type <a href="#associatedtype.Error" class="associatedtype">Error</a>: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;<a class="enum" href="../enum.Error.html" title="enum russh::Error">Error</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a></h4></section></div><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.auth_none" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#181-185">Source</a><h4 class="code-header">fn <a href="#method.auth_none" class="fn">auth_none</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Check authentication using the “none” method. Russh makes
+sure rejection happens in time <code>config.auth_rejection_time</code>,
+except if this method takes more than that.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.auth_password" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#192-196">Source</a><h4 class="code-header">fn <a href="#method.auth_password" class="fn">auth_password</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    password: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Check authentication using the “password” method. Russh
+makes sure rejection happens in time
+<code>config.auth_rejection_time</code>, except if this method takes more
+than that.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.auth_publickey_offered" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#206-212">Source</a><h4 class="code-header">fn <a href="#method.auth_publickey_offered" class="fn">auth_publickey_offered</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    public_key: &amp;'life2 <a class="enum" href="../../russh_keys/key/enum.PublicKey.html" title="enum russh_keys::key::PublicKey">PublicKey</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Check authentication using the “publickey” method. This method
+should just check whether the public key matches the
+authorized ones. Russh then checks the signature. If the key
+is unknown, or the signature is invalid, Russh guarantees
+that rejection happens in constant time
+<code>config.auth_rejection_time</code>, except if this method takes more
+time than that.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.auth_publickey" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#221-229">Source</a><h4 class="code-header">fn <a href="#method.auth_publickey" class="fn">auth_publickey</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    public_key: &amp;'life2 <a class="enum" href="../../russh_keys/key/enum.PublicKey.html" title="enum russh_keys::key::PublicKey">PublicKey</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Check authentication using the “publickey” method. This method
+is called after the signature has been verified and key
+ownership has been confirmed.
+Russh guarantees that rejection happens in constant time
+<code>config.auth_rejection_time</code>, except if this method takes more
+time than that.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.auth_keyboard_interactive" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#236-245">Source</a><h4 class="code-header">fn <a href="#method.auth_keyboard_interactive" class="fn">auth_keyboard_interactive</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    user: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    submethods: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    response: <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.Response.html" title="struct russh::server::Response">Response</a>&lt;'async_trait&gt;&gt;,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="enum" href="enum.Auth.html" title="enum russh::server::Auth">Auth</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Check authentication using the “keyboard-interactive”
+method. Russh makes sure rejection happens in time
+<code>config.auth_rejection_time</code>, except if this method takes more
+than that.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.auth_succeeded" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#249-251">Source</a><h4 class="code-header">fn <a href="#method.auth_succeeded" class="fn">auth_succeeded</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when authentication succeeds for a session.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_close" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#255-261">Source</a><h4 class="code-header">fn <a href="#method.channel_close" class="fn">channel_close</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when the client closes a channel.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_eof" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#265-271">Source</a><h4 class="code-header">fn <a href="#method.channel_eof" class="fn">channel_eof</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when the client sends EOF to a channel.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_open_session" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#276-282">Source</a><h4 class="code-header">fn <a href="#method.channel_open_session" class="fn">channel_open_session</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a new session channel is created.
+Return value indicates whether the channel request should be granted.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_open_x11" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#287-295">Source</a><h4 class="code-header">fn <a href="#method.channel_open_x11" class="fn">channel_open_x11</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+    originator_address: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    originator_port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a new X11 channel is created.
+Return value indicates whether the channel request should be granted.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_open_direct_tcpip" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#300-310">Source</a><h4 class="code-header">fn <a href="#method.channel_open_direct_tcpip" class="fn">channel_open_direct_tcpip</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+    host_to_connect: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    port_to_connect: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    originator_address: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    originator_port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,
+    'life3: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a new TCP/IP is created.
+Return value indicates whether the channel request should be granted.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_open_forwarded_tcpip" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#315-325">Source</a><h4 class="code-header">fn <a href="#method.channel_open_forwarded_tcpip" class="fn">channel_open_forwarded_tcpip</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.Channel.html" title="struct russh::Channel">Channel</a>&lt;<a class="enum" href="enum.Msg.html" title="enum russh::server::Msg">Msg</a>&gt;,
+    host_to_connect: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    port_to_connect: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    originator_address: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    originator_port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,
+    'life3: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a new forwarded connection comes in.
+<a href="https://www.rfc-editor.org/rfc/rfc4254#section-7">https://www.rfc-editor.org/rfc/rfc4254#section-7</a></p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.channel_open_confirmation" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#331-339">Source</a><h4 class="code-header">fn <a href="#method.channel_open_confirmation" class="fn">channel_open_confirmation</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    id: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    max_packet_size: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    window_size: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when the client confirmed our request to open a
+channel. A channel can only be written to after receiving this
+message (this library panics otherwise).</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.data" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#344-351">Source</a><h4 class="code-header">fn <a href="#method.data" class="fn">data</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    data: &amp;'life1 [<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u8.html">u8</a>],
+    session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when a data packet is received. A response can be
+written to the <code>response</code> argument.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.extended_data" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#358-366">Source</a><h4 class="code-header">fn <a href="#method.extended_data" class="fn">extended_data</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    code: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    data: &amp;'life1 [<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u8.html">u8</a>],
+    session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when an extended data packet is received. Code 1 means
+that this packet comes from stderr, other codes are not
+defined (see
+<a href="https://tools.ietf.org/html/rfc4254#section-5.2">RFC4254</a>).</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.window_adjusted" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#371-378">Source</a><h4 class="code-header">fn <a href="#method.window_adjusted" class="fn">window_adjusted</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    new_size: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Called when the network window is adjusted, meaning that we
+can send more bytes.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.adjust_window" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#383-385">Source</a><h4 class="code-header">fn <a href="#method.adjust_window" class="fn">adjust_window</a>(&amp;mut self, channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>, current: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a></h4></section></summary><div class="docblock"><p>Called when this server adjusts the network window. Return the
+next target window.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.pty_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#390-402">Source</a><h4 class="code-header">fn <a href="#method.pty_request" class="fn">pty_request</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    term: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    col_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    row_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    pix_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    pix_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    modes: &amp;'life2 [(<a class="enum" href="../enum.Pty.html" title="enum russh::Pty">Pty</a>, <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>)],
+    session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,
+    'life3: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client requests a pseudo-terminal with the given
+specifications.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.x11_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#406-416">Source</a><h4 class="code-header">fn <a href="#method.x11_request" class="fn">x11_request</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    single_connection: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>,
+    x11_auth_protocol: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    x11_auth_cookie: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    x11_screen_number: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,
+    'life3: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client requests an X11 connection.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.env_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#422-430">Source</a><h4 class="code-header">fn <a href="#method.env_request" class="fn">env_request</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    variable_name: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    variable_value: &amp;'life2 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,
+    'life3: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client wants to set the given environment variable. Check
+these carefully, as it is dangerous to allow any variable
+environment to be set.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.shell_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#434-440">Source</a><h4 class="code-header">fn <a href="#method.shell_request" class="fn">shell_request</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client requests a shell.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.exec_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#445-452">Source</a><h4 class="code-header">fn <a href="#method.exec_request" class="fn">exec_request</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    data: &amp;'life1 [<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u8.html">u8</a>],
+    session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client sends a command to execute, to be passed to a
+shell. Make sure to check the command before doing so.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.subsystem_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#457-464">Source</a><h4 class="code-header">fn <a href="#method.subsystem_request" class="fn">subsystem_request</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    name: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client asks to start the subsystem with the given name
+(such as sftp).</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.window_change_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#468-478">Source</a><h4 class="code-header">fn <a href="#method.window_change_request" class="fn">window_change_request</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    col_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    row_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    pix_width: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    pix_height: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client’s pseudo-terminal window size has changed.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.agent_request" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#482-488">Source</a><h4 class="code-header">fn <a href="#method.agent_request" class="fn">agent_request</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client requests OpenSSH agent forwarding</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.signal" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#493-500">Source</a><h4 class="code-header">fn <a href="#method.signal" class="fn">signal</a>&lt;'life0, 'life1, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    channel: <a class="struct" href="../struct.ChannelId.html" title="struct russh::ChannelId">ChannelId</a>,
+    signal: <a class="enum" href="../enum.Sig.html" title="enum russh::Sig">Sig</a>,
+    session: &amp;'life1 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.unit.html">()</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,</div></h4></section></summary><div class="docblock"><p>The client is sending a signal (usually to pass to the
+currently running process).</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.tcpip_forward" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#506-513">Source</a><h4 class="code-header">fn <a href="#method.tcpip_forward" class="fn">tcpip_forward</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    address: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    port: &amp;'life2 mut <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life3 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,
+    'life3: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Used for reverse-forwarding ports, see
+<a href="https://tools.ietf.org/html/rfc4254#section-7">RFC4254</a>.
+If <code>port</code> is 0, you should set it to the allocated port number.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.cancel_tcpip_forward" class="method"><a class="src rightside" href="../../src/russh/server/mod.rs.html#518-525">Source</a><h4 class="code-header">fn <a href="#method.cancel_tcpip_forward" class="fn">cancel_tcpip_forward</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+    &amp;'life0 mut self,
+    address: &amp;'life1 <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.str.html">str</a>,
+    port: <a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.u32.html">u32</a>,
+    session: &amp;'life2 mut <a class="struct" href="struct.Session.html" title="struct russh::server::Session">Session</a>,
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.85.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.85.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.85.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.85.0/std/primitive.bool.html">bool</a>, Self::<a class="associatedtype" href="trait.Handler.html#associatedtype.Error" title="type russh::server::Handler::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<div class="where">where
+    Self: <a class="trait" href="https://doc.rust-lang.org/1.85.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait,
+    'life0: 'async_trait,
+    'life1: 'async_trait,
+    'life2: 'async_trait,</div></h4></section></summary><div class="docblock"><p>Used to stop the reverse-forwarding of a port, see
+<a href="https://tools.ietf.org/html/rfc4254#section-7">RFC4254</a>.</p>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait is <b>not</b> <a href="https://doc.rust-lang.org/1.85.0/reference/items/traits.html#object-safety">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety", so this trait is not object safe.</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../../trait.impl/russh/server/trait.Handler.js" async></script></section></div></main></body></html>

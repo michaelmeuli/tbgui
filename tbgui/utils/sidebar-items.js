@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["check_if_dir_exists","check_if_running","create_tasks","delete_log_file","download_file","log_error"]};

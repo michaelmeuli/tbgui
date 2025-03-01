@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ColorMode","PrepareError","RenderError"],"struct":["Cache","Resolution","TextArea","TextAtlas","TextBounds","TextRenderer","Viewport"]};

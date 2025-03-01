@@ -1,0 +1,1 @@
+searchState.loadedDescShard("dark_light", 0, "Detect if dark mode or light mode is enabled.\nDark mode\nUnspecified\nLight mode\nDetect if light mode or dark mode is enabled. If the mode …\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.")

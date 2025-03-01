@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Outcome"],"fn":["black_box","map","scope","then"],"mod":["focusable","scrollable","text_input"],"trait":["Operation"]};
