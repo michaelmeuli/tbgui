@@ -3,7 +3,7 @@ use crate::ssh::*;
 use crate::types::{Message, Screen, State};
 use crate::utils::*;
 use crate::views::*;
-use iced::futures::TryFutureExt;
+use iced::futures::FutureExt;
 use iced::widget;
 use iced::window;
 use iced::{Element, Subscription, Task};
@@ -18,14 +18,21 @@ pub enum Tbgui {
 
 impl Tbgui {
     pub fn new() -> (Self, Task<Message>) {
-        let cfg = async {
-            delete_log_file();
-            confy::load("tbgui", None)
-        };
         (
             Self::Loading,
             Task::perform(
-                cfg.map_err(|e| format!("Error loading config: {:?}", e)),
+                async {
+                    delete_log_file();
+                    confy::load("tbgui", None).unwrap_or_else(|_| {
+                        let default_config = TbguiConfig::default();
+                        confy::store("tbgui", None, &default_config).unwrap();
+                        default_config
+                    })
+                }
+                .map(|config: TbguiConfig| {
+                    Ok::<TbguiConfig, String>(config)
+                        .map_err(|e| format!("Error loading config: {:?}", e))
+                }),
                 Message::Loaded,
             ),
         )

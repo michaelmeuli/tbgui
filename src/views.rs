@@ -158,10 +158,7 @@ pub fn view_config(config: &TbguiConfig) -> Element<'_, Message> {
     .align_x(Left);
     let script = column![script_text, script_input].spacing(10);
 
-    let remote_out_dir_text = text("Remote out dir:")
-        .width(Fill)
-        .size(16)
-        .align_x(Left);
+    let remote_out_dir_text = text("Remote out dir:").width(Fill).size(16).align_x(Left);
     let results_input = text_input("Remote results dir", &config.remote_out_dir)
         .on_input(Message::ConfigOutPathChanged)
         .on_submit(Message::ConfigOutPathSubmitted)
